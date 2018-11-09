@@ -11,9 +11,43 @@ module.exports = {
         filename: 'index.js',
     },
     module: {
-        // loader
         rules:[
-            { test: /\.html$/, loader: 'html-loader' }
+            // html loader
+            { 
+                test: /\.html$/, 
+                use: [
+                    { loader: 'html-loader' }
+                ],
+                include: path.resolve(__dirname, 'src')
+            },
+            // css style loader
+            {
+                test: /\.css$/,
+                use:[
+                    {loader: 'style-loader'},
+                    {loader: 'css-loader'}
+                ],
+                include: path.resolve(__dirname, 'src')
+            },
+            // babel-loader
+            {
+                test: /\.js$/,
+                use:[
+                    {
+                        loader: 'babel-loader',
+                        options: {
+                            // presets: ['babel/preset-react'],
+                            // plugins: [
+                            //     '@babel/plugin-syntax-dynamic-import',
+                            //     '@babel/plugin-transform-runtime'
+                            // ]
+                        }
+                    }
+                ],
+                include: path.resolve(__dirname, 'src')
+            }
+
+
         ].concat(vtkRules)
         // plugin
     },
