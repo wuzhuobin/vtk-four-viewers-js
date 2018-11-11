@@ -17,9 +17,10 @@
     "itk": "^9.1.2",
     "react": "^16.6.0",
     "react-dom": "^16.6.0",
-    "vtk.js": "^7.13.3"
+    "vtk.js": "^8.1.0"
   },
   "devDependencies": {
-    "kw-web-suite": "^7.0.2"
+    "kw-web-suite": "^8.0.0",
+    "worker-loader": "^2.0.0"
   }
 }

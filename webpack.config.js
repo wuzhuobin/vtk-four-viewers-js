@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
-const vtkRules = require('vtk.js/Utilities/config/dependency.js').webpack.v2.rules;
+const vtkRules = require('vtk.js/Utilities/config/dependency.js');
+const CopyWebpackPlugin = require('copy-webpack-plugin')
 
 module.exports = {
     // entry
@@ -12,6 +13,7 @@ module.exports = {
     },
     module: {
         rules:[
+            { test: path.resolve(__dirname, 'src/index.js'), loader: 'expose-loader?index' },
             // html loader
             { 
                 test: /\.html$/, 
@@ -36,20 +38,41 @@ module.exports = {
                     {
                         loader: 'babel-loader',
                         options: {
-                            // presets: ['babel/preset-react'],
-                            // plugins: [
-                            //     '@babel/plugin-syntax-dynamic-import',
-                            //     '@babel/plugin-transform-runtime'
-                            // ]
+                            presets: ['@babel/preset-react'],
                         }
                     }
                 ],
                 include: path.resolve(__dirname, 'src')
             }
-
-
-        ].concat(vtkRules)
-        // plugin
+        // vtk configure.
+        ].concat(vtkRules.webpack.core) 
+    },
+    plugins: [
+        // copy necessary itk modules
+        new CopyWebpackPlugin([
+            {
+                from: path.join(__dirname, 'node_modules', 'itk', 'WebWorkers'),
+                to: path.join(__dirname, 'public', 'itk', 'WebWorkers')
+            },
+            {
+                from: path.join(__dirname, 'node_modules', 'itk', 'ImageIOs'),
+                to: path.join(__dirname, 'public', 'itk', 'ImageIOs')
+            },
+            {
+                from: path.join(__dirname, 'node_modules', 'itk', 'MeshIOs'),
+                to: path.join(__dirname, 'public', 'itk', 'MeshIOs')
+            }
+        ])
+    ],
+    resolve: {
+        extensions: ['.webpack-loader.js', '.web-loader.js', '.loader.js', '.js', '.jsx'],
+        modules: [
+            path.resolve(__dirname, 'node_modules'),
+            path.resolve(__dirname, './src'),
+        ],
+    },
+    performance: {
+        maxAssetSize: 10000000
     },
     // mode 
     mode: 'development',

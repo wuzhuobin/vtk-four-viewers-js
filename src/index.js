@@ -9,6 +9,7 @@ root.id = 'root';
 body.appendChild(root);
 document.getElementsByTagName('html')[0].appendChild(body);
 ReactDOM.render(
-    React.createElement(App, {root: root}),
-    root    
+    React.createElement(App),
+    root
 );
+// ReactDOM.render(<App root={root}>{root}</App>);

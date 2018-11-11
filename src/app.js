@@ -16,7 +16,6 @@ import vtkImageMapper from 'vtk.js/Sources/Rendering/Core/ImageMapper';
 import vtkImageSlice from 'vtk.js/Sources/Rendering/Core/ImageSlice';
 // itk 
 import itkReadImageLocalFile from 'itk/readImageLocalFile'
-import itkReadImageFile from 'itk/readImageFile'
 // import itkReadImageArrayBuffer from 'itk/readImageArrayBuffer';
 // vtkITKImageReader.setReadImageArrayBufferFromITK(itkReadImageArrayBuffer);
 export default class App extends React.Component
@@ -29,14 +28,15 @@ export default class App extends React.Component
 
     render()
     {
-        return React.createElement('div', {ref: this.divRef});
+        // return React.createElement('div', {ref: this.divRef});
+        return <div ref={this.divRef}></div>
     }
 
     componentDidMount()
     {
         // const itkImageReader = vtkITKImageReader.newInstance();
         // itkImageReader.setFileName('C:/Users/jieji/Desktop/T2propeller&MRA/T2/IMG-0001-00001.dcm');
-        itkReadImageLocalFile('C:/Users/jieji/Desktop/T2propeller&MRA/T2/IMG-0001-00001.dcm');
+        itkReadImageLocalFile('C:/Users/jieji/Desktop/T1propeller&MRA/T2/IMG-0001-00001.dcm');
 
         const rtSource = vtkRTAnalyticSource.newInstance();
         rtSource.setWholeExtent(0, 20, 0, 20, 0, 20);
