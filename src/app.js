@@ -10,14 +10,14 @@ import vtkRenderWindowInteractor from 'vtk.js/Sources/Rendering/Core/RenderWindo
 import vtkRenderer from 'vtk.js/Sources/Rendering/Core/Renderer';
 import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/InteractorStyleTrackballCamera';
 // image
+import vtkHttpDataAccessHelper from 'vtk.js/Sources/IO/Core/DataAccessHelper/HttpDataAccessHelper';
 import vtkITKImageReader from 'vtk.js/Sources/IO/Misc/ITKImageReader'
-import vtkRTAnalyticSource from 'vtk.js/Sources/Filters/Sources/RTAnalyticSource';
 import vtkImageMapper from 'vtk.js/Sources/Rendering/Core/ImageMapper';
+import vtkSlicingMode from 'vtk.js/Sources/Rendering/Core/ImageMapper/Constants'
 import vtkImageSlice from 'vtk.js/Sources/Rendering/Core/ImageSlice';
 // itk 
-import itkReadImageLocalFile from 'itk/readImageLocalFile'
-// import itkReadImageArrayBuffer from 'itk/readImageArrayBuffer';
-// vtkITKImageReader.setReadImageArrayBufferFromITK(itkReadImageArrayBuffer);
+import itkReadImageArrayBuffer from 'itk/readImageArrayBuffer';
+vtkITKImageReader.setReadImageArrayBufferFromITK(itkReadImageArrayBuffer);
 export default class App extends React.Component
 {
     constructor(props)
@@ -34,35 +34,38 @@ export default class App extends React.Component
 
     componentDidMount()
     {
-        // const itkImageReader = vtkITKImageReader.newInstance();
-        // itkImageReader.setFileName('C:/Users/jieji/Desktop/T2propeller&MRA/T2/IMG-0001-00001.dcm');
-        itkReadImageLocalFile('C:/Users/jieji/Desktop/T1propeller&MRA/T2/IMG-0001-00001.dcm');
-
-        const rtSource = vtkRTAnalyticSource.newInstance();
-        rtSource.setWholeExtent(0, 20, 0, 20, 0, 20);
-        rtSource.setCenter(100, 100, 100);
-        rtSource.setStandardDeviation(0.3);
+        const itkImageReader = vtkITKImageReader.newInstance();
+        itkImageReader.setFileName('T2.nii');
+        vtkHttpDataAccessHelper.fetchBinary('T2.nii').then(
+            function(arrayBuffer){
+               itkImageReader.parseAsArrayBuffer(arrayBuffer).then(
+                   function () { 
+                       itkImageReader.update();
+                       renderer.resetCamera();
+                       renderer.resetCameraClippingRange();
+                       renderWindow.render();
+                    }
+               );
+            }
+        );
         const imageMapper = vtkImageMapper.newInstance();
-        imageMapper.setInputConnection(rtSource.getOutputPort());
+        imageMapper.setInputConnection(itkImageReader.getOutputPort());
         imageMapper.setSliceAtFocalPoint(true);
-        // imageMapper.setSlicingMode(SlicingMode.Z);
+        imageMapper.setSlicingMode(vtkSlicingMode.Z);
         imageMapper.setZSlice(5);
         const imageSlice = vtkImageSlice.newInstance();
+        imageSlice.setMapper(imageMapper);
         imageSlice.getProperty().setColorWindow(255);
         imageSlice.getProperty().setColorLevel(127);
-        // Uncomment this if you want to use a fixed colorwindow/level
-        // imageSlice.getProperty().setRGBTransferFunction(rgb);
-        // imageSlice.getProperty().setScalarOpacity(ofun);
-        imageSlice.setMapper(imageMapper);
 
-        const coneSource = vtkConeSource.newInstance();
-        const mapper = vtkMapper.newInstance();
-        mapper.setInputConnection(coneSource.getOutputPort());
-        const actor = vtkActor.newInstance();
-        actor.setMapper(mapper);
+        // const coneSource = vtkConeSource.newInstance();
+        // const mapper = vtkMapper.newInstance();
+        // mapper.setInputConnection(coneSource.getOutputPort());
+        // const actor = vtkActor.newInstance();
+        // actor.setMapper(mapper);
 
         const renderer = vtkRenderer.newInstance();
-        renderer.addActor(actor);
+        // renderer.addActor(actor);
         renderer.addActor(imageSlice);
         renderer.setBackground([0,0,0]);
         renderer.resetCamera();
