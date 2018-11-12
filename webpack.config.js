@@ -83,7 +83,7 @@ module.exports = {
     devServer: {
         contentBase: [
             path.resolve(__dirname, 'public'),
-            'C:/Users/jieji/Desktop'
+            // 'C:/Users/jieji/Desktop'
         ]
     }
 }
