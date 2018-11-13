@@ -1,7 +1,8 @@
 
 import macro from 'vtk.js/Sources/macro';
 import vtkPolyData from 'vtk.js/Sources/Common/DataModel/PolyData';
-import vtkMath from 'vtk.js/Sources/Common/Core/Math';
+import vtkCellArray from 'vtk.js/Sources/Common/Core/CellArray'
+import vtkPoints from 'vtk.js/Sources/Common/Core/Points'
 
 const { vtkWarningMacro } = macro;
 
@@ -12,60 +13,79 @@ const { vtkWarningMacro } = macro;
 function vtkCursor3D(publicAPI, model) {
   // Set our className
   model.classHierarchy.push('vtkCursor3D');
-
   publicAPI.requestData = (inData, outData) => {
     if (model.deleted) {
       return;
     }
 
-    const dataset = outData[0];
-
-    // Check input
-    const pointDataType = dataset
-      ? dataset.getPoints().getDataType()
-      : 'Float32Array';
-    const pd = vtkPolyData.newInstance();
-    const v21 = new Float32Array(3);
-    vtkMath.subtract(model.point2, model.point1, v21);
-    if (vtkMath.norm(v21) <= 0.0) {
-      vtkWarningMacro('Zero-length line definition');
-      return;
-    }
-
-    // hand create a line with special scalars
-    const xres = model.resolution;
-    const numPts = xres + 1;
-
-    // Points
-    const points = new window[pointDataType](numPts * 3);
-    pd.getPoints().setData(points, 3);
-
-    // Cells
-    const lines = new Uint32Array(numPts + 1);
-    pd.getLines().setData(lines, 1);
-
-    let idx = 0;
-    let t = 0.0;
-    for (let i = 0; i < xres + 1; i++) {
-      t = i / xres;
-
-      points[idx * 3] = model.point1[0] + t * v21[0];
-      points[idx * 3 + 1] = model.point1[1] + t * v21[1];
-      points[idx * 3 + 2] = model.point1[2] + t * v21[2];
-
-      idx++;
-    }
-
-    // Generate line connectivity
-    //
-    idx = 0;
-    lines[0] = numPts;
-    for (let i = 0; i < numPts; i++) {
-      lines[i + 1] = i;
-    }
-
-    // Update output
-    outData[0] = pd;
+    // // const dataset = outData[0];
+    // let point1;
+    // let point2;
+    // point1 = [model.modelBounds[0], model.focalPoint[1], model.focalPoint[2]];
+    // point2 = [model.modelBounds[1], model.focalPoint[1], model.focalPoint[2]];
+    // const LineSource1 = vtkLineSource.newInstance({ point1, point2, resolution:1 });
+    // point1 = [model.focalPoint[0], model.modelBounds[2], model.focalPoint[2]];
+    // point2 = [model.focalPoint[0], model.modelBounds[3], model.focalPoint[2]];
+    // const LineSource2 = vtkLineSource.newInstance({ point1, point2, resolution:1 });
+    // point1 = [model.focalPoint[0], model.focalPoint[1], model.modelBounds[4]];
+    // point2 = [model.focalPoint[0], model.focalPoint[1], model.modelBounds[5]];
+    // const LineSource3 = vtkLineSource.newInstance({ point1, point2, resolution:1 });
+    // const appendPolyData = vtkAppendPolyData.newInstance();
+    // appendPolyData.setInputConnection(LineSource1.getOutputPort());
+    // appendPolyData.addInputConnection(LineSource2.getOutputPort());
+    // appendPolyData.addInputConnection(LineSource3.getOutputPort());
+    // // console.log(outData[0]);
+    // outData[0] = appendPolyData.getOutputData();
+    // console.log(outData[0].getLines().getData());
+    // console.log(outData[0].getPoints().getData());
+    // // Check input
+    // const pointDataType = outData[0]
+    //   ? outData[0].getPoints().getDataType()
+    //   : 'Float32Array';
+    const polyData = vtkPolyData.newInstance();
+    const numPts = 6;
+    const numLines = 3;
+    const newPts = vtkPoints.newInstance({size: numPts * 3});
+    //  vtkCellArray is a supporting object that explicitly represents cell
+    //  connectivity. The cell array structure is a raw integer list
+    //  of the form: (n,id1,id2,...,idn, n,id1,id2,...,idn, ...)
+    //  where n is the number of points in the cell, and id is a zero-offset index
+    //  into an associated point list.
+    const newLines = vtkCellArray.newInstance({size:numLines * (2 + 1)});
+    let index = 0;
+    newPts.getData()[index * 3 * 2 + 0 + 0] = model.modelBounds[0];
+    newPts.getData()[index * 3 * 2 + 1 + 0] = model.focalPoint[1];
+    newPts.getData()[index * 3 * 2 + 2 + 0] = model.focalPoint[2];
+    newPts.getData()[index * 3 * 2 + 0 + 3] = model.modelBounds[1];
+    newPts.getData()[index * 3 * 2 + 1 + 3] = model.focalPoint[1];
+    newPts.getData()[index * 3 * 2 + 2 + 3] = model.focalPoint[2];
+    newLines.getData()[index * 3 + 0] = 2;
+    newLines.getData()[index * 3 + 1] = index * 2 + 0;
+    newLines.getData()[index * 3 + 2] = index * 2 + 1;
+    ++index;
+    newPts.getData()[index * 3 * 2 + 0 + 0] = model.focalPoint[0];
+    newPts.getData()[index * 3 * 2 + 1 + 0] = model.modelBounds[2];
+    newPts.getData()[index * 3 * 2 + 2 + 0] = model.focalPoint[2];
+    newPts.getData()[index * 3 * 2 + 0 + 3] = model.focalPoint[0];
+    newPts.getData()[index * 3 * 2 + 1 + 3] = model.modelBounds[3];
+    newPts.getData()[index * 3 * 2 + 2 + 3] = model.focalPoint[2];
+    newLines.getData()[index * 3 + 0] = 2;
+    newLines.getData()[index * 3 + 1] = index * 2 + 0;
+    newLines.getData()[index * 3 + 2] = index * 2 + 1;
+    ++index;
+    newPts.getData()[index * 3 * 2 + 0 + 0] = model.focalPoint[0];
+    newPts.getData()[index * 3 * 2 + 1 + 0] = model.focalPoint[1];
+    newPts.getData()[index * 3 * 2 + 2 + 0] = model.modelBounds[4];
+    newPts.getData()[index * 3 * 2 + 0 + 3] = model.focalPoint[0];
+    newPts.getData()[index * 3 * 2 + 1 + 3] = model.focalPoint[1];
+    newPts.getData()[index * 3 * 2 + 2 + 3] = model.modelBounds[5];
+    newLines.getData()[index * 3 + 0] = 2;
+    newLines.getData()[index * 3 + 1] = index * 2 + 0;
+    newLines.getData()[index * 3 + 2] = index * 2 + 1;
+    ++index;   
+    polyData.setPoints(newPts);
+    polyData.setLines(newLines);
+    outData[0] = polyData;
   };
 }
 
@@ -74,10 +94,9 @@ function vtkCursor3D(publicAPI, model) {
 // ----------------------------------------------------------------------------
 
 const DEFAULT_VALUES = {
-  resolution: 10,
-  point1: [-1, 0, 0],
-  point2: [1, 0, 0],
-  pointType: 'Float32Array',
+  modelBounds: [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0],
+  focalPoint: [0.0, 0.0, 0.0],
+  pointType: 'Float32Array'
 };
 
 // ----------------------------------------------------------------------------
@@ -86,9 +105,10 @@ export function extend(publicAPI, model, initialValues = {}) {
   Object.assign(model, DEFAULT_VALUES, initialValues);
 
   // Build VTK API
+  // Cursor3D
   macro.obj(publicAPI, model);
-  macro.setGet(publicAPI, model, ['resolution']);
-  macro.setGetArray(publicAPI, model, ['point1', 'point2'], 3);
+  macro.setGetArray(publicAPI, model, ['modelBounds'], 6);
+  macro.setGetArray(publicAPI, model, ['focalPoint'], 3);
   macro.algo(publicAPI, model, 0, 1);
   vtkCursor3D(publicAPI, model);
 }

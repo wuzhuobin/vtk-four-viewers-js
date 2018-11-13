@@ -1,9 +1,11 @@
 // react 
 import React from 'react'
+// me 
+import vtkCursor3D from './vtkCursor3D'
+import vtkLineSource from 'vtk.js/Sources/Filters/Sources/LineSource'
 // vtk
 import vtkMapper from 'vtk.js/Sources/Rendering/Core/Mapper'
 import vtkActor from 'vtk.js/Sources/Rendering/Core/Actor'
-import vtkConeSource from 'vtk.js/Sources/Filters/Sources/ConeSource'
 import vtkOpenGLRenderWindow from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow';
 import vtkRenderWindow from 'vtk.js/Sources/Rendering/Core/RenderWindow';
 import vtkRenderWindowInteractor from 'vtk.js/Sources/Rendering/Core/RenderWindowInteractor';
@@ -18,7 +20,7 @@ import vtkImageSlice from 'vtk.js/Sources/Rendering/Core/ImageSlice';
 // itk 
 import itkReadImageArrayBuffer from 'itk/readImageArrayBuffer';
 vtkITKImageReader.setReadImageArrayBufferFromITK(itkReadImageArrayBuffer);
-export default class App extends React.Component
+export default class ReactApp extends React.Component
 {
     constructor(props)
     {
@@ -58,14 +60,20 @@ export default class App extends React.Component
         imageSlice.getProperty().setColorWindow(255);
         imageSlice.getProperty().setColorLevel(127);
 
-        // const coneSource = vtkConeSource.newInstance();
-        // const mapper = vtkMapper.newInstance();
-        // mapper.setInputConnection(coneSource.getOutputPort());
-        // const actor = vtkActor.newInstance();
-        // actor.setMapper(mapper);
+        const cursor3D = vtkCursor3D.newInstance();
+        cursor3D.setModelBounds([-100, 100, -100, 100, -100, 100]);
+        // cursor3D.setFocalPoint([-100, -100, -100]);
+        const line = vtkLineSource.newInstance();
+        line.setPoint1([100, 100, 100]);
+        line.setPoint2([-100, -100, -100]);
+        line.setResolution(100);
+        const mapper = vtkMapper.newInstance();
+        mapper.setInputConnection(cursor3D.getOutputPort());
+        const actor = vtkActor.newInstance();
+        actor.setMapper(mapper);
 
         const renderer = vtkRenderer.newInstance();
-        // renderer.addActor(actor);
+        renderer.addActor(actor);
         renderer.addActor(imageSlice);
         renderer.setBackground([0,0,0]);
         renderer.resetCamera();

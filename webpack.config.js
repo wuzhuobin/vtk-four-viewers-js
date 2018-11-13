@@ -84,6 +84,8 @@ module.exports = {
         contentBase: [
             path.resolve(__dirname, 'public'),
             // 'C:/Users/jieji/Desktop'
-        ]
+        ],
+        // auto open
+        open: true
     }
 }
