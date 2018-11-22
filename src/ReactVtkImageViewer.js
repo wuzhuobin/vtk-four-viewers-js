@@ -9,25 +9,22 @@ import vtkOpenGLRenderWindow from 'vtk.js/Sources/Rendering/OpenGL/RenderWindow'
 import vtkRenderWindow from 'vtk.js/Sources/Rendering/Core/RenderWindow';
 import vtkRenderWindowInteractor from 'vtk.js/Sources/Rendering/Core/RenderWindowInteractor';
 import vtkRenderer from 'vtk.js/Sources/Rendering/Core/Renderer';
-import vtkHttpDataAccessHelper from 'vtk.js/Sources/IO/Core/DataAccessHelper/HttpDataAccessHelper';
-import vtkITKImageReader from 'vtk.js/Sources/IO/Misc/ITKImageReader'
 import vtkImageMapper from 'vtk.js/Sources/Rendering/Core/ImageMapper';
 import vtkImageMapperSlicingMode from 'vtk.js/Sources/Rendering/Core/ImageMapper/Constants';
 import vtkImageSlice from 'vtk.js/Sources/Rendering/Core/ImageSlice';
-// itk 
-import itkReadImageArrayBuffer from 'itk/readImageArrayBuffer';
-vtkITKImageReader.setReadImageArrayBufferFromITK(itkReadImageArrayBuffer);
+export const ORIENTATION = 
+{
+  YZ: 0,
+  XZ: 1,
+  XY: 2
+};
 export default class ReactVtkImageViewer extends React.Component
 {
   constructor(props)
   {
     super(props);
     this.container = React.createRef();
-    this.itkImageReader = vtkITKImageReader.newInstance();
-    this.itkImageReader.setFileName(this.props.fileName);
     this.imageMapper = vtkImageMapper.newInstance();
-    this.imageMapper.setSliceAtFocalPoint(true);
-    this.imageMapper.setInputConnection(this.itkImageReader.getOutputPort());
     this.imageSlice = vtkImageSlice.newInstance();
     this.imageSlice.setMapper(this.imageMapper);
 
@@ -47,26 +44,29 @@ export default class ReactVtkImageViewer extends React.Component
     this.renderWindow = vtkRenderWindow.newInstance();
     this.renderWindow.addRenderer(this.renderer);
     this.interactor = vtkRenderWindowInteractor.newInstance();
-    if(this.props.style != null)
+    if(this.props.interactorStyle != null)
     {
-        this.interactor.setInteractorStyle(this.props.style);
+        this.interactor.setInteractorStyle(this.props.interactorStyle);
     }
-    // update 
-    vtkHttpDataAccessHelper.fetchBinary(this.props.fileName).then(
-      function(arrayBuffer)
+    const slice = this.imageMapper.getSlice();
+    switch(this.props.orientation)
+    {
+      case ORIENTATION.YZ:
       {
-        this.itkImageReader.parseAsArrayBuffer(arrayBuffer).then(
-          function()
-          {
-            this.itkImageReader.update();
-            this.itkImageReader.getOutputPort()
-            this.renderer.resetCamera();
-            this.renderer.resetCameraClippingRange();
-            this.renderWindow.render();
-          }.bind(this)
-        );
-      }.bind(this)
-    );
+        this.imageMapper.setXSlice(slice);
+        break;
+      }
+      case ORIENTATION.XZ:
+      {
+        this.imageMapper.setYSlice(slice);
+        break;
+      }
+      case ORIENTATION.XY:
+      {
+        this.imageMapper.setZSlice(slice);
+        break;
+      }
+    }
   }
 
   render()
@@ -88,5 +88,19 @@ export default class ReactVtkImageViewer extends React.Component
     this.interactor.setView(this.openGLRenderWindow);
     this.interactor.bindEvents(this.container.current);
     this.interactor.initialize();
+  }
+
+  componentDidUpdate(prevProps, prevState, snapshot)
+  {
+    if(this.props.imageData != null)
+    {
+      this.imageMapper.setInputData(this.props.imageData);
+      const [low, high] = this.props.imageData.getPointData().getScalars().getRange();
+      this.imageSlice.getProperty().setColorWindow(high - low);
+      this.imageSlice.getProperty().setColorLevel((high + low) * 0.5);
+      this.renderer.resetCamera();
+      this.renderer.resetCameraClippingRange();
+      this.renderWindow.render();
+    }
   }
 }
