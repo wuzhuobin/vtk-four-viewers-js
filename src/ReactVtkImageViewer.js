@@ -12,7 +12,7 @@ import vtkRenderer from 'vtk.js/Sources/Rendering/Core/Renderer';
 import vtkImageMapper from 'vtk.js/Sources/Rendering/Core/ImageMapper';
 import vtkImageMapperSlicingMode from 'vtk.js/Sources/Rendering/Core/ImageMapper/Constants';
 import vtkImageSlice from 'vtk.js/Sources/Rendering/Core/ImageSlice';
-export const ORIENTATION = 
+export const SLICE_ORIENTATION = 
 {
   YZ: 0,
   XZ: 1,
@@ -24,6 +24,8 @@ export default class ReactVtkImageViewer extends React.Component
   {
     super(props);
     this.container = React.createRef();
+    this.firstRender = true;
+
     this.imageMapper = vtkImageMapper.newInstance();
     this.imageSlice = vtkImageSlice.newInstance();
     this.imageSlice.setMapper(this.imageMapper);
@@ -44,33 +46,60 @@ export default class ReactVtkImageViewer extends React.Component
     this.renderWindow = vtkRenderWindow.newInstance();
     this.renderWindow.addRenderer(this.renderer);
     this.interactor = vtkRenderWindowInteractor.newInstance();
-    if(this.props.interactorStyle != null)
+
+  }
+
+  shouldComponentUpdate(nextProps, nextState)
+  {
+    if(nextProps.interactorStyle != null && nextProps.interactorStyle != this.props.interactorStyle)
     {
-        this.interactor.setInteractorStyle(this.props.interactorStyle);
+      console.log(this.props.interactorStyle);
+      console.log(nextProps.interactorStyle);
+      this.interactor.setInteractorStyle(nextProps.interactorStyle);
     }
-    const slice = this.imageMapper.getSlice();
-    switch(this.props.orientation)
+    if(nextProps.imageData != null && nextProps.imageData != this.props.imageData)
     {
-      case ORIENTATION.YZ:
-      {
-        this.imageMapper.setXSlice(slice);
-        break;
-      }
-      case ORIENTATION.XZ:
-      {
-        this.imageMapper.setYSlice(slice);
-        break;
-      }
-      case ORIENTATION.XY:
-      {
-        this.imageMapper.setZSlice(slice);
-        break;
+      this.imageMapper.setInputData(nextProps.imageData);
+      const [low, high] = nextProps.imageData.getPointData().getScalars().getRange();
+      this.imageSlice.getProperty().setColorWindow(high - low);
+      this.imageSlice.getProperty().setColorLevel((high + low) * 0.5);
+    }
+    if(nextProps.sliceOrientation != this.props.sliceOrientation)
+    {
+      console.log(nextProps.sliceOrientation)
+      const slice = this.imageMapper.getSlice();
+      switch (nextProps.sliceOrientation) {
+        case SLICE_ORIENTATION.YZ:
+          {
+            this.imageMapper.setXSlice(slice);
+            break;
+          }
+        case SLICE_ORIENTATION.XZ:
+          {
+            this.imageMapper.setYSlice(slice);
+            break;
+          }
+        case SLICE_ORIENTATION.XY:
+          {
+            this.imageMapper.setZSlice(slice);
+            break;
+          }
       }
     }
+    return true;
   }
 
   render()
   {
+    if(this.firstRender)
+    {
+      this.renderer.resetCamera();
+      this.renderer.resetCameraClippingRange();
+    }
+    if(this.props.imageData != null)
+    {
+      this.renderWindow.render();
+    }
     return <div ref={this.container}></div>
   }
 
@@ -92,15 +121,5 @@ export default class ReactVtkImageViewer extends React.Component
 
   componentDidUpdate(prevProps, prevState, snapshot)
   {
-    if(this.props.imageData != null)
-    {
-      this.imageMapper.setInputData(this.props.imageData);
-      const [low, high] = this.props.imageData.getPointData().getScalars().getRange();
-      this.imageSlice.getProperty().setColorWindow(high - low);
-      this.imageSlice.getProperty().setColorLevel((high + low) * 0.5);
-      this.renderer.resetCamera();
-      this.renderer.resetCameraClippingRange();
-      this.renderWindow.render();
-    }
   }
 }
