@@ -47,57 +47,40 @@ export default class ReactVtkImageViewer extends React.Component
     this.renderWindow.addRenderer(this.renderer);
     this.interactor = vtkRenderWindowInteractor.newInstance();
 
+    this.setInput(this.props.imageData);
+    this.setSliceOrientation(this.props.sliceOrientation);
+    this.setInteractorStyle(this.props.interactorStyle);
+    this.setCursorPosition(this.props.cursorPosition);
   }
 
   shouldComponentUpdate(nextProps, nextState)
   {
-    if(nextProps.interactorStyle != null && nextProps.interactorStyle != this.props.interactorStyle)
+    if(nextProps.imageData != this.props.imageData)
     {
-      console.log(this.props.interactorStyle);
-      console.log(nextProps.interactorStyle);
-      this.interactor.setInteractorStyle(nextProps.interactorStyle);
+      this.setInput(nextProps.imageData);
     }
-    if(nextProps.imageData != null && nextProps.imageData != this.props.imageData)
+    if(nextProps.orientation != this.props.sliceOrientation)
     {
-      this.imageMapper.setInputData(nextProps.imageData);
-      const [low, high] = nextProps.imageData.getPointData().getScalars().getRange();
-      this.imageSlice.getProperty().setColorWindow(high - low);
-      this.imageSlice.getProperty().setColorLevel((high + low) * 0.5);
+      this.setSliceOrientation(nextProps.imageData);
     }
-    if(nextProps.sliceOrientation != this.props.sliceOrientation)
+    if(nextProps.interactorStyle != this.props.interactorStyle)
     {
-      console.log(nextProps.sliceOrientation)
-      const slice = this.imageMapper.getSlice();
-      switch (nextProps.sliceOrientation) {
-        case SLICE_ORIENTATION.YZ:
-          {
-            this.imageMapper.setXSlice(slice);
-            break;
-          }
-        case SLICE_ORIENTATION.XZ:
-          {
-            this.imageMapper.setYSlice(slice);
-            break;
-          }
-        case SLICE_ORIENTATION.XY:
-          {
-            this.imageMapper.setZSlice(slice);
-            break;
-          }
-      }
+      this.setInteractorStyle(nextProps.interactorStyle);
     }
+    this.setCursorPosition(this.props.cursorPosition)
     return true;
   }
 
   render()
   {
-    if(this.firstRender)
-    {
-      this.renderer.resetCamera();
-      this.renderer.resetCameraClippingRange();
-    }
     if(this.props.imageData != null)
     {
+      if (this.firstRender)
+      {
+        this.renderer.resetCamera();
+        this.renderer.resetCameraClippingRange();
+        this.firstRender = false;
+      }
       this.renderWindow.render();
     }
     return <div ref={this.container}></div>
@@ -121,5 +104,91 @@ export default class ReactVtkImageViewer extends React.Component
 
   componentDidUpdate(prevProps, prevState, snapshot)
   {
+  }
+
+  setInput(imageData)
+  {
+    if(imageData == null || this.imageMapper.getInputData() == imageData)
+    {
+      return;
+    }
+    this.imageMapper.setInputData(imageData);
+    const [low, high] = imageData.getPointData().getScalars().getRange();
+    this.imageSlice.getProperty().setColorWindow(high - low);
+    this.imageSlice.getProperty().setColorLevel((high + low) * 0.5);
+  }
+
+  setSliceOrientation(orientation)
+  {
+    switch (orientation) {
+      case SLICE_ORIENTATION.YZ:
+      {
+        this.imageMapper.setSlicingMode(vtkImageMapperSlicingMode.SlicingMode.X);
+        break;
+      }
+      case SLICE_ORIENTATION.XZ:
+      {
+        this.imageMapper.setSlicingMode(vtkImageMapperSlicingMode.SlicingMode.Y);
+        break;
+      }
+      case SLICE_ORIENTATION.XY:
+      {
+        this.imageMapper.setSlicingMode(vtkImageMapperSlicingMode.SlicingMode.Z);
+        break;
+      }
+    }
+    this.updateOrientation();
+  }
+
+  updateOrientation()
+  {
+    const camera = this.renderer.getActiveCamera();
+    switch(this.imageMapper.getSlicingMode())
+    {
+      case vtkImageMapperSlicingMode.SlicingMode.Z:
+      case vtkImageMapperSlicingMode.SlicingMode.K:
+      {
+        camera.setFocalPoint(0, 0, 0);
+        camera.setPosition(0, 0, 1);
+        camera.setViewUp(0, 1, 0);
+        break;
+      }
+      case vtkImageMapperSlicingMode.SlicingMode.Y:
+      case vtkImageMapperSlicingMode.SlicingMode.J:
+      {
+        camera.setFocalPoint(0, 0, 0);
+        camera.setPosition(0, -1, 0);
+        camera.setViewUp(0, 0, 1);
+        break;
+      }
+      case vtkImageMapperSlicingMode.SlicingMode.X:
+      case vtkImageMapperSlicingMode.SlicingMode.I:
+      {
+        camera.setFocalPoint(0, 0, 0);
+        camera.setPosition(1, 0, 0);
+        camera.setViewUp(0, 0, 1);
+        break;
+      }
+      default:
+        break;
+    }
+  }
+
+  setInteractorStyle(interactorStyle)
+  {
+    this.interactor.setInteractorStyle(interactorStyle);
+    if(this.interactor.getInteractorStyle().isA('vtkInteractorStyleImage2'))
+    {
+      this.interactor.getInteractorStyle().setViewer(this);
+    }
+  }
+
+  setCursorPosition(pos)
+  {
+    if(pos == null)
+    {
+      return;
+    }
+    this.cursorActor.setPosition(pos[0], pos[1], pos[2]);
   }
 }

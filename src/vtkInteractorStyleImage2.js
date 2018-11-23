@@ -1,62 +1,101 @@
 
 import macro from 'vtk.js/Sources/macro';
 import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/InteractorStyleTrackballCamera';
-import vtkMath from 'vtk.js/Sources/Common/Core/Math';
+import vtkPicker from 'vtk.js/Sources/Rendering/Core/Picker'
+import vtkPointPicker from 'vtk.js/Sources/Rendering/Core/PointPicker';
 import { States } from 'vtk.js/Sources/Rendering/Core/InteractorStyle/Constants';
-
+States.IS_NAVIGATION = 1026;
+const stateNames =
+{
+  Navigation: States.IS_NAVIGATION
+}
 // ----------------------------------------------------------------------------
-// vtkInteractorStyleImage methods
+// vtkInteractorStyleImage2 methods
 // ----------------------------------------------------------------------------
 
-function vtkInteractorStyleImage(publicAPI, model) {
+function vtkInteractorStyleImage2(publicAPI, model) {
   // Set our className
-  model.classHierarchy.push('vtkInteractorStyleImage');
+  model.classHierarchy.push('vtkInteractorStyleImage2');
 
   // Public API methods
+  // create bunch of Start/EndState methods
+  Object.keys(stateNames).forEach((key) => {
+    macro.event(publicAPI, model, `Start${key}Event`);
+    publicAPI[`start${key}`] = () => {
+      if (model.state !== States.IS_NONE) {
+        return;
+      }
+      model.state = stateNames[key];
+      model.interactor.requestAnimation(publicAPI);
+      publicAPI.invokeStartInteractionEvent({ type: 'StartInteractionEvent' });
+      publicAPI[`invokeStart${key}Event`]({ type: `Start${key}Event` });
+    };
+    macro.event(publicAPI, model, `End${key}Event`);
+    publicAPI[`end${key}`] = () => {
+      if (model.state !== stateNames[key]) {
+        return;
+      }
+      model.state = States.IS_NONE;
+      model.interactor.cancelAnimation(publicAPI);
+      publicAPI.invokeEndInteractionEvent({ type: 'EndInteractionEvent' });
+      publicAPI[`invokeEnd${key}Event`]({ type: `End${key}Event` });
+      model.interactor.render();
+    };
+  });
+
   publicAPI.superHandleMouseMove = publicAPI.handleMouseMove;
   publicAPI.handleMouseMove = (callData) => {
     const pos = callData.position;
     const renderer = callData.pokedRenderer;
 
     switch (model.state) {
-      case States.IS_WINDOW_LEVEL:
-        publicAPI.windowLevel(renderer, pos);
+      // case States.IS_WINDOW_LEVEL:
+      //   publicAPI.windowLevel(renderer, pos);
+      //   publicAPI.invokeInteractionEvent({ type: 'InteractionEvent' });
+      //   break;
+      case States.IS_NAVIGATION:
+        publicAPI.navigation(renderer, pos);
         publicAPI.invokeInteractionEvent({ type: 'InteractionEvent' });
         break;
       default:
+        publicAPI.superHandleMouseMove(callData);
         break;
     }
-    publicAPI.superHandleMouseMove(callData);
   };
 
   //----------------------------------------------------------------------------
   publicAPI.superHandleLeftButtonPress = publicAPI.handleLeftButtonPress;
   publicAPI.handleLeftButtonPress = (callData) => {
-    const pos = callData.position;
-
-    if (!callData.shiftKey && !callData.controlKey) {
-      model.windowLevelStartPosition[0] = pos.x;
-      model.windowLevelStartPosition[1] = pos.y;
-      // Get the last (the topmost) image
-      publicAPI.setCurrentImageNumber(model.currentImageNumber);
-      const property = model.currentImageProp.getProperty();
-      if (property) {
-        model.windowLevelInitial[0] = property.getColorWindow();
-        model.windowLevelInitial[1] = property.getColorLevel();
-      }
-      publicAPI.startWindowLevel();
-    }  else {
-      // The rest of the button + key combinations remain the same
-      publicAPI.superHandleLeftButtonPress(callData);
-    }
+    publicAPI.startNavigation();
+    // publicAPI.superHandleLeftButtonPress(callData);
+    
+    // const pos = callData.position;
+    // if (!callData.shiftKey && !callData.controlKey) {
+    //   model.windowLevelStartPosition[0] = pos.x;
+    //   model.windowLevelStartPosition[1] = pos.y;
+    //   // Get the last (the topmost) image
+    //   publicAPI.setCurrentImageNumber(model.currentImageNumber);
+    //   const property = model.currentImageProp.getProperty();
+    //   if (property) {
+    //     model.windowLevelInitial[0] = property.getColorWindow();
+    //     model.windowLevelInitial[1] = property.getColorLevel();
+    //   }
+    //   publicAPI.startWindowLevel();
+    // }  else {
+    //   // The rest of the button + key combinations remain the same
+    //   publicAPI.superHandleLeftButtonPress(callData);
+    // }
   };
 
   //--------------------------------------------------------------------------
   publicAPI.superHandleLeftButtonRelease = publicAPI.handleLeftButtonRelease;
   publicAPI.handleLeftButtonRelease = () => {
     switch (model.state) {
-      case States.IS_WINDOW_LEVEL:
-        publicAPI.endWindowLevel();
+      // case States.IS_WINDOW_LEVEL:
+      //   publicAPI.endWindowLevel();
+      //   break;
+      case States.IS_NAVIGATION:
+        publicAPI.endNavigation();
         break;
       default:
         publicAPI.superHandleLeftButtonRelease();
@@ -163,6 +202,16 @@ function vtkInteractorStyleImage(publicAPI, model) {
   }
 
   //----------------------------------------------------------------------------
+  publicAPI.navigation = (renderer, pos) => {
+    const pointPicker = vtkPointPicker.newInstance();
+    if(pointPicker.pick([pos.x, pos.y, pos.z], renderer) != 1)
+    {
+      const worldPos = pointPicker.getPickedPositions(); 
+      model.viewer.setCursorPosition(worldPos);
+      return;
+    }
+  }
+  //----------------------------------------------------------------------------
   // This is a way of dealing with images as if they were layers.
   // It looks through the renderer's list of props and sets the
   // interactor ivars from the Nth image that it finds.  You can
@@ -211,6 +260,7 @@ function vtkInteractorStyleImage(publicAPI, model) {
 // ----------------------------------------------------------------------------
 
 const DEFAULT_VALUES = {
+  viewer: null,
   windowLevelStartPosition: [0, 0],
   windowLevelCurrentPosition: [0, 0],
   windowLevelInitial: [1.0, 0.5],
@@ -233,14 +283,15 @@ export function extend(publicAPI, model, initialValues = {}) {
   vtkInteractorStyleTrackballCamera.extend(publicAPI, model, initialValues);
 
   // For more macro methods, see "Sources/macro.js"
-
+  macro.setGet(publicAPI, model, ['viewer']);
+  
   // Object specific methods
-  vtkInteractorStyleImage(publicAPI, model);
+  vtkInteractorStyleImage2(publicAPI, model);
 }
 
 // ----------------------------------------------------------------------------
 
-export const newInstance = macro.newInstance(extend, 'vtkInteractorStyleImage');
+export const newInstance = macro.newInstance(extend, 'vtkInteractorStyleImage2');
 
 // ----------------------------------------------------------------------------
 

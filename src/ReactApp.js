@@ -46,19 +46,18 @@ export default class ReactApp extends React.Component
     render()
     {
         return <div style={this.gridContainter}>
+          <ReactVtkImageViewer
+            interactorStyle={vtkInteractorStyleImage2.newInstance()}
+            imageData={this.state.imageData}
+            sliceOrientation={SLICE_ORIENTATION.XZ}
+          />
+          <ReactVtkImageViewer
+            interactorStyle={vtkInteractorStyleImage2.newInstance()}
+            imageData={this.state.imageData}
+            sliceOrientation={SLICE_ORIENTATION.XY}
+          />
           <ReactVtkImageViewer 
             interactorStyle = {vtkInteractorStyleImage2.newInstance()}
-            imageData = {this.state.imageData}
-            sliceOrientation = {SLICE_ORIENTATION.XY}
-           />
-          <ReactVtkImageViewer 
-            interactorStyle = {vtkInteractorStyleImage2.newInstance()}
-            imageData = {this.state.imageData}
-            sliceOrientation = {SLICE_ORIENTATION.XZ}
-           />
-          <ReactVtkImageViewer 
-            interactorStyle = {vtkInteractorStyleImage2.newInstance()}
-            imageData = {this.state.imageData}
            />
           <ReactVtkImageViewer 
             interactorStyle = {vtkInteractorStyleImage2.newInstance()}
