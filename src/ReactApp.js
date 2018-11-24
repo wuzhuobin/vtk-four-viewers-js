@@ -3,6 +3,7 @@ import React from 'react'
 // me 
 import ReactVtkImageViewer from './ReactVtkImageViewer'
 import {SLICE_ORIENTATION} from './ReactVtkImageViewer'
+import ReactVtkVolumeViewer from './ReactVtkVolumeViewer'
 import vtkInteractorStyleImage2 from './vtkInteractorStyleImage2'
 // vtk 
 import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/InteractorStyleTrackballCamera'
@@ -56,8 +57,9 @@ export default class ReactApp extends React.Component
             imageData={this.state.imageData}
             sliceOrientation={SLICE_ORIENTATION.XY}
           />
-          <ReactVtkImageViewer 
-            interactorStyle = {vtkInteractorStyleImage2.newInstance()}
+          <ReactVtkVolumeViewer 
+            interactorStyle={vtkInteractorStyleTrackballCamera.newInstance()}
+            imageData={this.state.imageData}
            />
           <ReactVtkImageViewer 
             interactorStyle = {vtkInteractorStyleImage2.newInstance()}

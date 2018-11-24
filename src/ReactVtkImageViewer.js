@@ -73,7 +73,7 @@ export default class ReactVtkImageViewer extends React.Component
 
   render()
   {
-    if(this.props.imageData != null)
+    if(this.imageMapper.getInputData() != null)
     {
       if (this.firstRender)
       {
@@ -100,10 +100,7 @@ export default class ReactVtkImageViewer extends React.Component
     this.interactor.setView(this.openGLRenderWindow);
     this.interactor.bindEvents(this.container.current);
     this.interactor.initialize();
-  }
-
-  componentDidUpdate(prevProps, prevState, snapshot)
-  {
+    return true;
   }
 
   setInput(imageData)
