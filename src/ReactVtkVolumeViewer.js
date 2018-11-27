@@ -1,5 +1,6 @@
 // me 
 import vtkCursor3D from './vtkCursor3D'
+import Preset from './presets/presets.xml'
 // react
 import React from 'react'
 // vtk
@@ -11,6 +12,8 @@ import vtkRenderWindowInteractor from 'vtk.js/Sources/Rendering/Core/RenderWindo
 import vtkRenderer from 'vtk.js/Sources/Rendering/Core/Renderer';
 import vtkVolumeMapper from 'vtk.js/Sources/Rendering/Core/VolumeMapper'
 import vtkVolume from 'vtk.js/Sources/Rendering/Core/Volume'
+import vtkColorTransferFunction from 'vtk.js/Sources/Rendering/Core/ColorTransferFunction'
+import vtkPiecewiseFunction from 'vtk.js/Sources/Common/DataModel/PiecewiseFunction'
 export default class ReactVtkVolumeViewer extends React.Component
 {
   constructor(props)
@@ -41,7 +44,7 @@ export default class ReactVtkVolumeViewer extends React.Component
     this.interactor = vtkRenderWindowInteractor.newInstance();
 
     this.setInput(this.props.imageData);
-    this.setInteractorStyle(this.props.interactorStyle)
+    this.setInteractorStyle(this.props.interactorStyle);
   }
 
   shouldComponentUpdate(nextProps, nextState)
@@ -96,10 +99,60 @@ export default class ReactVtkVolumeViewer extends React.Component
       return;
     }
     this.volumeMapper.setInputData(imageData);
+    this.setPresets(22);
+    this.renderWindow.render();
   }
 
   setInteractorStyle(interactorStyle)
   {
     this.interactor.setInteractorStyle(interactorStyle);
+  }
+
+  setPresets(preset)
+  {
+    if(preset < 0 || Preset.VolumePreset.VolumeProperty.length < preset)
+    {
+      return;
+    }
+    const presetJson = Preset.VolumePreset.VolumeProperty[preset].$;
+    this.volume.getProperty().setInterpolationTypeToLinear();
+    // this.volume.getProperty().setShade(presetJson.shade);
+    this.volume.getProperty().setAmbient(presetJson.ambient);
+    this.volume.getProperty().setDiffuse(presetJson.diffuse);
+    this.volume.getProperty().setSpecular(presetJson.specular);
+    this.volume.getProperty().setSpecularPower(presetJson.specularPower);
+    const colorTransferFunction = vtkColorTransferFunction.newInstance();
+    const colorTransfer = presetJson.colorTransfer.split(' ').map(Number);
+    for(let i = 1; i < colorTransfer.length; i+=4)
+    {
+      colorTransferFunction.addRGBPoint(
+        colorTransfer[i + 0],
+        colorTransfer[i + 1],
+        colorTransfer[i + 2],
+        colorTransfer[i + 3],
+      );
+      // console.log(
+      //   colorTransfer[i + 0],
+      //   colorTransfer[i + 1],
+      //   colorTransfer[i + 2],
+      //   colorTransfer[i + 3],
+      // );
+    }
+    this.volume.getProperty().setRGBTransferFunction(0, colorTransferFunction); 
+    const scalarOpacityFunction = vtkPiecewiseFunction.newInstance();
+    const scalarOpacity = presetJson.scalarOpacity.split(' ').map(Number);
+    for(let i = 1; i < scalarOpacity.length; i+=2)
+    {
+      scalarOpacityFunction.addPoint(scalarOpacity[i + 0], scalarOpacity[i + 1]);
+      // console.log(
+      //   scalarOpacity[i + 0],
+      //   scalarOpacity[i + 1]
+      // );
+    }
+    this.volume.getProperty().setScalarOpacity(0, scalarOpacityFunction);
+    this.interactor.requestAnimation('lighting');
+    this.volumeMapper.onLightingActivated(() => {
+      this.interactor.cancelAnimation('lighting');
+    });
   }
 }

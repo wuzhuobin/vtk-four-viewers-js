@@ -17,7 +17,8 @@
     "itk": "^9.1.2",
     "react": "^16.6.3",
     "react-dom": "^16.6.3",
-    "vtk.js": "^8.2.0"
+    "vtk.js": "^8.2.0",
+    "xml-loader": "^1.2.1"
   },
   "devDependencies": {
     "kw-web-suite": "^8.0.0",

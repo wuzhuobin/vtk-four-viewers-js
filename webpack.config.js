@@ -39,6 +39,13 @@ module.exports = {
                 ],
                 include: path.resolve(__dirname, 'src')
             },
+            {
+                test: /\.xml$/,
+                use:[
+                    {loader: 'xml-loader'}
+                ],
+                include: path.resolve(__dirname, 'src')
+            },
             // babel-loader
             {
                 test: /\.js$/,
