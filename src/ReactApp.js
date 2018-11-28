@@ -28,7 +28,7 @@ export default class ReactApp extends React.Component
         {
           imageData: null
         };
-        const fileName = 'T2.nii'
+        const fileName = 'T2.nii';
         vtkHttpDataAccessHelper.fetchBinary(fileName).then((arrayBuffer) => 
           {
             const itkImageReader = vtkITKImageReader.newInstance();
@@ -60,6 +60,7 @@ export default class ReactApp extends React.Component
           <ReactVtkVolumeViewer 
             interactorStyle={vtkInteractorStyleTrackballCamera.newInstance()}
             imageData={this.state.imageData}
+            preset={1}
            />
           <ReactVtkImageViewer 
             interactorStyle = {vtkInteractorStyleImage2.newInstance()}
