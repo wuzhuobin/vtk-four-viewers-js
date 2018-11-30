@@ -92,7 +92,7 @@ module.exports = {
             path.resolve(__dirname, 'public'),
             // 'C:/Users/jieji/Desktop'
         ],
-        // auto open
-        open: true
+        // allowed external access
+        host: '0.0.0.0',
     }
 }

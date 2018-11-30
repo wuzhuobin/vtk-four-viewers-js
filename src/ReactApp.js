@@ -18,6 +18,7 @@ export default class ReactApp extends React.Component
     constructor(props)
     {
         super(props);
+        this.focalPoints = [0,0,0];
         this.gridContainter = 
         {
           display: 'grid',
@@ -51,21 +52,25 @@ export default class ReactApp extends React.Component
             interactorStyle={vtkInteractorStyleImage2.newInstance()}
             imageData={this.state.imageData}
             sliceOrientation={SLICE_ORIENTATION.XZ}
+            focalPoints={this.focalPoints}
           />
           <ReactVtkImageViewer
             interactorStyle={vtkInteractorStyleImage2.newInstance()}
             imageData={this.state.imageData}
             sliceOrientation={SLICE_ORIENTATION.XY}
+            focalPoints={this.focalPoints}
           />
           <ReactVtkVolumeViewer 
             interactorStyle={vtkInteractorStyleTrackballCamera.newInstance()}
             imageData={this.state.imageData}
             preset={1}
+            focalPoints={this.focalPoints}
            />
           <ReactVtkImageViewer 
             interactorStyle = {vtkInteractorStyleImage2.newInstance()}
             imageData = {this.state.imageData}
             sliceOrientation = {SLICE_ORIENTATION.YZ}
+            focalPoints={this.focalPoints}
            />
         </div>
     }

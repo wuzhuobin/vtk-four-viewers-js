@@ -207,7 +207,7 @@ function vtkInteractorStyleImage2(publicAPI, model) {
     if(pointPicker.pick([pos.x, pos.y, pos.z], renderer) != 1)
     {
       const worldPos = pointPicker.getPickedPositions(); 
-      model.viewer.setCursorPosition(worldPos);
+      model.viewer.setCursorPosition(worldPos[0]);
       return;
     }
   }

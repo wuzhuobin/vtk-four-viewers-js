@@ -27,7 +27,11 @@ export default class ReactVtkVolumeViewer extends React.Component
     this.volume.setMapper(this.volumeMapper);
 
     this.cursor3D = vtkCursor3D.newInstance();
-    this.cursor3D.setModelBounds([-15, 15, -15, 15, -15, 15]);
+    this.cursor3D.setModelBounds([-150, 150, -150, 150, -150, 150]);
+    this.cursor3D.setFocalPoints(this.props.focalPoints);
+    this.cursor3D.setXShadows(false);
+    this.cursor3D.setYShadows(false);
+    this.cursor3D.setZShadows(false);
     this.cursorMapper = vtkMapper.newInstance();
     this.cursorMapper.setInputConnection(this.cursor3D.getOutputPort());
     this.cursorActor = vtkActor.newInstance();
