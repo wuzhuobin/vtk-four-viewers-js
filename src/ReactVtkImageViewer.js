@@ -32,7 +32,6 @@ export default class ReactVtkImageViewer extends React.Component
 
     this.cursor3D = vtkCursor3D.newInstance();
     this.cursor3D.setModelBounds([-150, 150, -150, 150, -150, 150]);
-    this.cursor3D.setFocalPoints(this.props.focalPoints);
     this.cursorMapper = vtkMapper.newInstance();
     this.cursorMapper.setInputConnection(this.cursor3D.getOutputPort());
     this.cursorActor = vtkActor.newInstance();
@@ -51,7 +50,7 @@ export default class ReactVtkImageViewer extends React.Component
     this.setInput(this.props.imageData);
     this.setSliceOrientation(this.props.sliceOrientation);
     this.setInteractorStyle(this.props.interactorStyle);
-    this.setCursorPosition(this.props.cursorPosition);
+    this.setCursorPosition(this.props.focalPoints);
   }
 
   shouldComponentUpdate(nextProps, nextState)
@@ -68,7 +67,7 @@ export default class ReactVtkImageViewer extends React.Component
     {
       this.setInteractorStyle(nextProps.interactorStyle);
     }
-    this.setCursorPosition(this.props.cursorPosition)
+    this.setCursorPosition(this.props.focalPoints)
     return true;
   }
 

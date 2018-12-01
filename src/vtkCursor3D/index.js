@@ -13,9 +13,20 @@ const { vtkWarningMacro } = macro;
 function vtkCursor3D(publicAPI, model) {
   // Set our className
   model.classHierarchy.push('vtkCursor3D');
-  // public methods
+  // Capture "parentClass" api for internal use
+  const superClass = Object.assign({}, publicAPI);
+  // Public API methods
   publicAPI.setModelBounds = (bounds) =>{
-    if(model.modelBounds == bounds)
+    if(!Array.isArray(bounds) || bounds.length < 6)
+    {
+      return;
+    }
+    if(model.modelBounds[0] == bounds[0] && 
+      model.modelBounds[1] == bounds[1] && 
+      model.modelBounds[2] == bounds[2] && 
+      model.modelBounds[3] == bounds[3] && 
+      model.modelBounds[4] == bounds[4] && 
+      model.modelBounds[5] == bounds[5] )
     {
       return;
     }
@@ -30,9 +41,12 @@ function vtkCursor3D(publicAPI, model) {
   }
 
   publicAPI.setFocalPoints = (points) => {
-    // if (points[0] == model.focalPoint[0] && points[1] == model.focalPoint[1] &&
-    //     points[2] == model.focalPoint[2]) 
-    if(points == model.focalPoint)
+    if(!Array.isArray(points) || points.length < 3)
+    {
+      return;
+    }
+    if (points[0] == model.focalPoint[0] && points[1] == model.focalPoint[1] &&
+        points[2] == model.focalPoint[2]) 
     {
       return;
     }
@@ -64,6 +78,22 @@ function vtkCursor3D(publicAPI, model) {
         }
       }
     } 
+  }
+
+  publicAPI.setAll = (flag) => {
+    publicAPI.setOutline(flag);
+    publicAPI.setAxes(flag);
+    publicAPI.setXShadows(flag);
+    publicAPI.setYShadows(flag);
+    publicAPI.setZShadows(flag)
+  }
+
+  publicAPI.allOn = () => {
+    publicAPI.setAll(true);
+  } 
+  
+  publicAPI.allOff = () => {
+    publicAPI.setAll(false);
   }
 
   publicAPI.requestData = (inData, outData) => {

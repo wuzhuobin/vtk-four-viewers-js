@@ -49,6 +49,7 @@ export default class ReactVtkVolumeViewer extends React.Component
     this.setInput(this.props.imageData);
     this.setInteractorStyle(this.props.interactorStyle);
     this.setPreset(this.props.preset);
+    this.setCursorPosition(this.props.focalPoints);
   }
 
   shouldComponentUpdate(nextProps, nextState)
@@ -143,5 +144,14 @@ export default class ReactVtkVolumeViewer extends React.Component
       this.volume.getProperty().setSpecular(presetJson.specular);
       this.volume.getProperty().setSpecularPower(presetJson.specularPower);
     }
+  }
+
+  setCursorPosition(pos)
+  {
+    if(pos == null)
+    {
+      return;
+    }
+    this.cursor3D.setFocalPoints(pos);
   }
 }
