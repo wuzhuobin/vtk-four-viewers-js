@@ -7,7 +7,7 @@ import ReactVtkVolumeViewer from './ReactVtkViewer/ReactVtkVolumeViewer';
 import vtkInteractorStyleImage2 from './vtkInteractorStyleImage2';
 // vtk 
 import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/InteractorStyleTrackballCamera';
-import vtkINteractorStyleImage from 'vtk.js/Sources/Interaction/Style/InteractorStyleImage'
+import vtkInteractorStyleImage from 'vtk.js/Sources/Interaction/Style/InteractorStyleImage'
 import vtkHttpDataAccessHelper from 'vtk.js/Sources/IO/Core/DataAccessHelper/HttpDataAccessHelper';
 import vtkITKImageReader from 'vtk.js/Sources/IO/Misc/ITKImageReader';
 import vtkImageMapperSlicingMode from 'vtk.js/Sources/Rendering/Core/ImageMapper/Constants';
@@ -102,7 +102,7 @@ export default class ReactApp extends React.Component
       {
         for(let i = 0; i < styles.length; ++i)
         {
-          styles[i] = vtkINteractorStyleImage.newInstance();
+          styles[i] = vtkInteractorStyleImage.newInstance();
         }
       }
       else if(event == 'TrackballCamera')
