@@ -1,11 +1,7 @@
-
 import macro from 'vtk.js/Sources/macro';
 import vtkPolyData from 'vtk.js/Sources/Common/DataModel/PolyData';
-import vtkCellArray from 'vtk.js/Sources/Common/Core/CellArray'
-import vtkPoints from 'vtk.js/Sources/Common/Core/Points'
-
-const { vtkWarningMacro } = macro;
-
+import vtkCellArray from 'vtk.js/Sources/Common/Core/CellArray';
+import vtkPoints from 'vtk.js/Sources/Common/Core/Points';
 // ----------------------------------------------------------------------------
 // vtkCursor3D methods
 // ----------------------------------------------------------------------------
@@ -13,63 +9,63 @@ const { vtkWarningMacro } = macro;
 function vtkCursor3D(publicAPI, model) {
   // Set our className
   model.classHierarchy.push('vtkCursor3D');
-  // Capture "parentClass" api for internal use
-  const superClass = Object.assign({}, publicAPI);
   // Public API methods
-  publicAPI.setModelBounds = (bounds) =>{
-    if(!Array.isArray(bounds) || bounds.length < 6)
-    {
+  publicAPI.setModelBounds = (bounds) => {
+    if (!Array.isArray(bounds) || bounds.length < 6) {
       return;
     }
-    if(model.modelBounds[0] == bounds[0] && 
-      model.modelBounds[1] == bounds[1] && 
-      model.modelBounds[2] == bounds[2] && 
-      model.modelBounds[3] == bounds[3] && 
-      model.modelBounds[4] == bounds[4] && 
-      model.modelBounds[5] == bounds[5] )
-    {
+    if (
+      model.modelBounds[0] === bounds[0] &&
+      model.modelBounds[1] === bounds[1] &&
+      model.modelBounds[2] === bounds[2] &&
+      model.modelBounds[3] === bounds[3] &&
+      model.modelBounds[4] === bounds[4] &&
+      model.modelBounds[5] === bounds[5]
+    ) {
       return;
     }
     publicAPI.modified();
-    for(let i = 0; i < bounds.length && i < model.modelBounds.length; ++i)
-    {
+    for (let i = 0; i < bounds.length && i < model.modelBounds.length; ++i) {
       model.modelBounds[i] = bounds[i];
     }
     for (let i = 0; i < 3; ++i) {
-      model.modelBounds[2 * i] = Math.min(model.modelBounds[2 * i], model.modelBounds[2 * i + 1]);
+      model.modelBounds[2 * i] = Math.min(
+        model.modelBounds[2 * i],
+        model.modelBounds[2 * i + 1]
+      );
     }
-  }
+  };
 
-  publicAPI.setFocalPoints = (points) => {
-    if(!Array.isArray(points) || points.length < 3)
-    {
+  publicAPI.setFocalPoint = (points) => {
+    if (!Array.isArray(points) || points.length < 3) {
       return;
     }
-    if (points[0] == model.focalPoint[0] && points[1] == model.focalPoint[1] &&
-        points[2] == model.focalPoint[2]) 
-    {
+    if (
+      points[0] === model.focalPoint[0] &&
+      points[1] === model.focalPoint[1] &&
+      points[2] === model.focalPoint[2]
+    ) {
       return;
     }
     publicAPI.modified();
     const v = [];
-    for (let i = 0; i < 3; i++)
-    {
+    for (let i = 0; i < 3; i++) {
       v[i] = points[i] - model.focalPoint[i];
       model.focalPoint[i] = points[i];
 
-      if (model.translationMode)
-      {
+      if (model.translationMode) {
         model.modelBounds[2 * i] += v[i];
         model.modelBounds[2 * i + 1] += v[i];
       }
-      else if (model.wrap) //wrap
-      {
-        model.focalPoint[i] = model.modelBounds[2 * i] +
-            ((model.focalPoint[i] - model.modelBounds[2 * i]) * 1.0) %
-              ((model.modelBounds[2 * i + 1] - model.modelBounds[2 * i]) * 1.0);
+      // wrap
+      else if (model.wrap) {
+        model.focalPoint[i] =
+          model.modelBounds[2 * i] +
+          (((model.focalPoint[i] - model.modelBounds[2 * i]) * 1.0) %
+            ((model.modelBounds[2 * i + 1] - model.modelBounds[2 * i]) * 1.0));
       }
-      else //clamp
-      {
+      // clamp
+      else {
         if (points[i] < model.modelBounds[2 * i]) {
           model.focalPoint[i] = model.modelBounds[2 * i];
         }
@@ -77,24 +73,24 @@ function vtkCursor3D(publicAPI, model) {
           model.focalPoint[i] = model.modelBounds[2 * i + 1];
         }
       }
-    } 
-  }
+    }
+  };
 
   publicAPI.setAll = (flag) => {
     publicAPI.setOutline(flag);
     publicAPI.setAxes(flag);
     publicAPI.setXShadows(flag);
     publicAPI.setYShadows(flag);
-    publicAPI.setZShadows(flag)
-  }
+    publicAPI.setZShadows(flag);
+  };
 
   publicAPI.allOn = () => {
     publicAPI.setAll(true);
-  } 
-  
+  };
+
   publicAPI.allOff = () => {
     publicAPI.setAll(false);
-  }
+  };
 
   publicAPI.requestData = (inData, outData) => {
     if (model.deleted) {
@@ -102,58 +98,54 @@ function vtkCursor3D(publicAPI, model) {
     }
     let numPts = 0;
     let numLines = 0;
-    // Check bounding box and origin. 
-    if(model.wrap)
-    {
-      for(let i = 0; i < model.focalPoint.length; ++i)
-      {
-        model.focalPoint[i] = model.modelBounds[2*i] + 
-          ((model.focalPoint[i] - model.modelBounds[2*i]) * 1.0 ) %
-          ((model.focalPoint[2*i + 1] - model.modelBounds[2*i]));
+    // Check bounding box and origin
+    if (model.wrap) {
+      for (let i = 0; i < model.focalPoint.length; ++i) {
+        model.focalPoint[i] =
+          model.modelBounds[2 * i] +
+          (((model.focalPoint[i] - model.modelBounds[2 * i]) * 1.0) %
+            (model.focalPoint[2 * i + 1] - model.modelBounds[2 * i]));
       }
-    }
-    else
-    {
-      for(let i = 0; i < model.focalPoint.length; ++i)
-      {
-        model.focalPoint[i] = Math.max(model.focalPoint[i], model.modelBounds[2*i]);
-        model.focalPoint[i] = Math.min(model.focalPoint[i], model.modelBounds[2*i + 1]);
+    } else {
+      for (let i = 0; i < model.focalPoint.length; ++i) {
+        model.focalPoint[i] = Math.max(
+          model.focalPoint[i],
+          model.modelBounds[2 * i]
+        );
+        model.focalPoint[i] = Math.min(
+          model.focalPoint[i],
+          model.modelBounds[2 * i + 1]
+        );
       }
     }
     // allocate storage
-    if(model.axes)
-    {
+    if (model.axes) {
       numPts += 6;
       numLines += 3;
     }
 
-    if (model.outline)
-    {
+    if (model.outline) {
       numPts += 8;
       numLines += 12;
     }
-  
-    if (model.xShadows)
-    {
+
+    if (model.xShadows) {
       numPts += 8;
       numLines += 4;
     }
-  
-    if (model.yShadows)
-    {
+
+    if (model.yShadows) {
       numPts += 8;
       numLines += 4;
     }
-  
-    if (model.zShadows)
-    {
+
+    if (model.zShadows) {
       numPts += 8;
       numLines += 4;
     }
-    
-    if(numPts == 0)
-    {
-      return 1;
+
+    if (numPts === 0) {
+      return;
     }
     const polyData = vtkPolyData.newInstance();
     const newPts = vtkPoints.newInstance({ size: numPts * 3 });
@@ -166,8 +158,7 @@ function vtkCursor3D(publicAPI, model) {
     let pid = 0;
     let cid = 0;
     // Create axes
-    if(model.axes)
-    {
+    if (model.axes) {
       newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
       newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
       newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
@@ -175,7 +166,7 @@ function vtkCursor3D(publicAPI, model) {
       newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
       newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
       newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
-      ++pid
+      ++pid;
       newLines.getData()[cid * 3 + 0] = 2;
       newLines.getData()[cid * 3 + 1] = pid - 2;
       newLines.getData()[cid * 3 + 2] = pid - 1;
@@ -195,7 +186,7 @@ function vtkCursor3D(publicAPI, model) {
       newPts.getData()[pid * 3 + 0] = model.focalPoint[0];
       newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
       newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-      ++pid
+      ++pid;
       newPts.getData()[pid * 3 + 0] = model.focalPoint[0];
       newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
       newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
@@ -206,8 +197,7 @@ function vtkCursor3D(publicAPI, model) {
       ++cid;
     }
     // create outline
-    if(model.outline)
-    {
+    if (model.outline) {
       // first traid
       newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
       newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
@@ -259,7 +249,7 @@ function vtkCursor3D(publicAPI, model) {
       newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
       newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
       const corner134 = pid;
-      ++pid
+      ++pid;
       newLines.getData()[(cid + 0) * 3 + 0] = 2;
       newLines.getData()[(cid + 0) * 3 + 1] = corner135;
       newLines.getData()[(cid + 0) * 3 + 2] = corner035;
@@ -270,8 +260,8 @@ function vtkCursor3D(publicAPI, model) {
       newLines.getData()[(cid + 2) * 3 + 1] = corner135;
       newLines.getData()[(cid + 2) * 3 + 2] = corner134;
       cid += 3;
-      // Fill in remaining lines;
-      // vtk.js do not support checking repeating insertion. 
+      // Fill in remaining lines
+      // vtk.js do not support checking repeating insertion
       // newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
       // newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
       // newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
@@ -334,10 +324,8 @@ function vtkCursor3D(publicAPI, model) {
       cid += 2;
     }
     // create x-shadows
-    if(model.xShadows)
-    {
-      for(let i = 0; i < 2; ++i)
-      {
+    if (model.xShadows) {
+      for (let i = 0; i < 2; ++i) {
         newPts.getData()[pid * 3 + 0] = model.modelBounds[i];
         newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
         newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
@@ -366,10 +354,8 @@ function vtkCursor3D(publicAPI, model) {
     }
 
     // create y-shadows
-    if(model.yShadows)
-    {
-      for(let i = 0; i < 2; ++i)
-      {
+    if (model.yShadows) {
+      for (let i = 0; i < 2; ++i) {
         newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
         newPts.getData()[pid * 3 + 1] = model.modelBounds[i + 2];
         newPts.getData()[pid * 3 + 2] = model.focalPoint[2];
@@ -398,10 +384,8 @@ function vtkCursor3D(publicAPI, model) {
     }
 
     // create z-shadows
-    if(model.zShadows)
-    {
-      for(let i = 0; i < 2; ++i)
-      {
+    if (model.zShadows) {
+      for (let i = 0; i < 2; ++i) {
         newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
         newPts.getData()[pid * 3 + 1] = model.focalPoint[1];
         newPts.getData()[pid * 3 + 2] = model.modelBounds[i + 4];
@@ -428,7 +412,7 @@ function vtkCursor3D(publicAPI, model) {
         ++cid;
       }
     }
-    // update ourseleves and release memory. 
+    // update ourseleves and release memory
     model.focus.getPoints().getData()[0] = model.focalPoint[0];
     model.focus.getPoints().getData()[1] = model.focalPoint[1];
     model.focus.getPoints().getData()[2] = model.focalPoint[2];
@@ -446,13 +430,13 @@ const DEFAULT_VALUES = {
   focus: vtkPolyData.newInstance(),
   modelBounds: [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0],
   focalPoint: [0.0, 0.0, 0.0],
-  outline:  true,
+  outline: true,
   axes: true,
   xShadows: true,
   yShadows: true,
-  zShadows: true, 
+  zShadows: true,
   wrap: false,
-  translationMode: false
+  translationMode: false,
 };
 
 // ----------------------------------------------------------------------------

@@ -1,17 +1,22 @@
 // react 
 import React from 'react'
 // me 
-import ReactVtkImageViewer from './ReactVtkImageViewer'
-import {SLICE_ORIENTATION} from './ReactVtkImageViewer'
-import ReactVtkVolumeViewer from './ReactVtkVolumeViewer'
-import vtkInteractorStyleImage2 from './vtkInteractorStyleImage2'
+import ReactVtkImageViewer from './ReactVtkViewer/ReactVtkImageViewer';
+import {SLICE_ORIENTATION} from './ReactVtkViewer/ReactVtkImageViewer';
+import ReactVtkVolumeViewer from './ReactVtkViewer/ReactVtkVolumeViewer';
+import vtkInteractorStyleImage2 from './vtkInteractorStyleImage2';
 // vtk 
-import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/InteractorStyleTrackballCamera'
+import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/InteractorStyleTrackballCamera';
+import vtkINteractorStyleImage from 'vtk.js/Sources/Interaction/Style/InteractorStyleImage'
 import vtkHttpDataAccessHelper from 'vtk.js/Sources/IO/Core/DataAccessHelper/HttpDataAccessHelper';
-import vtkITKImageReader from 'vtk.js/Sources/IO/Misc/ITKImageReader'
+import vtkITKImageReader from 'vtk.js/Sources/IO/Misc/ITKImageReader';
 import vtkImageMapperSlicingMode from 'vtk.js/Sources/Rendering/Core/ImageMapper/Constants';
 // itk 
 import itkReadImageArrayBuffer from 'itk/readImageArrayBuffer';
+// material-ui
+import AppBar from '@material-ui/core/AppBar';
+import Toolbar from '@material-ui/core/Toolbar';
+import Button from '@material-ui/core/Button'
 vtkITKImageReader.setReadImageArrayBufferFromITK(itkReadImageArrayBuffer);
 export default class ReactApp extends React.Component
 {
@@ -27,8 +32,10 @@ export default class ReactApp extends React.Component
         };
         this.state = 
         {
-          imageData: null
+          imageData: null,
+          styles: [null, null, null, null]
         };
+        // this.handleButtonClicked = this.handleButtonClicked.bind(this);
         const fileName = 'T2.nii';
         vtkHttpDataAccessHelper.fetchBinary(fileName).then((arrayBuffer) => 
           {
@@ -42,36 +49,69 @@ export default class ReactApp extends React.Component
             );
           }
         );
-
     }
 
     render()
     {
         return <div style={this.gridContainter}>
+          <AppBar color='default'>
+            <Toolbar>
+              <Button onClick={this.handleButtonClicked.bind(this, 'Navigation')}>Navigation</Button>
+              <Button onClick={this.handleButtonClicked.bind(this, 'WindowLevel')}>WindowLevel</Button>
+              <Button onClick={this.handleButtonClicked.bind(this, 'TrackballCamera')}>TrackballCamera</Button>
+            </Toolbar>
+          </AppBar>
           <ReactVtkImageViewer
-            interactorStyle={vtkInteractorStyleImage2.newInstance()}
-            imageData={this.state.imageData}
+            interactorStyle={this.state.styles[0]}
+            input={this.state.imageData}
             sliceOrientation={SLICE_ORIENTATION.XZ}
             focalPoints={this.focalPoints}
           />
           <ReactVtkImageViewer
-            interactorStyle={vtkInteractorStyleImage2.newInstance()}
-            imageData={this.state.imageData}
+            interactorStyle={this.state.styles[1]}
+            input={this.state.imageData}
             sliceOrientation={SLICE_ORIENTATION.XY}
             focalPoints={this.focalPoints}
           />
           <ReactVtkVolumeViewer 
-            interactorStyle={vtkInteractorStyleTrackballCamera.newInstance()}
-            imageData={this.state.imageData}
+            interactorStyle={this.state.styles[2]}
+            input={this.state.imageData}
             preset={1}
             focalPoints={this.focalPoints}
            />
           <ReactVtkImageViewer 
-            interactorStyle = {vtkInteractorStyleImage2.newInstance()}
-            imageData = {this.state.imageData}
-            sliceOrientation = {SLICE_ORIENTATION.YZ}
+            interactorStyle={this.state.styles[3]}
+            input={this.state.imageData}
+            sliceOrientation={SLICE_ORIENTATION.YZ}
             focalPoints={this.focalPoints}
            />
         </div>
+    }
+
+    handleButtonClicked(event, e)
+    {
+      const styles = Array(4);
+      if(event == 'Navigation')
+      {
+        for(let i = 0; i < styles.length; ++i)
+        {
+          styles[i] = vtkInteractorStyleImage2.newInstance();
+        }
+      }
+      else if(event == 'WindowLevel')
+      {
+        for(let i = 0; i < styles.length; ++i)
+        {
+          styles[i] = vtkINteractorStyleImage.newInstance();
+        }
+      }
+      else if(event == 'TrackballCamera')
+      {
+        for(let i = 0; i < styles.length; ++i)
+        {
+          styles[i] = vtkInteractorStyleTrackballCamera.newInstance();
+        }
+      }
+      this.setState({ styles: styles });
     }
 }
