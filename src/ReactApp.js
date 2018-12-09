@@ -17,6 +17,8 @@ import itkReadImageArrayBuffer from 'itk/readImageArrayBuffer';
 import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Button from '@material-ui/core/Button'
+import Grid from '@material-ui/core/Grid';
+
 vtkITKImageReader.setReadImageArrayBufferFromITK(itkReadImageArrayBuffer);
 export default class ReactApp extends React.Component
 {
@@ -53,38 +55,50 @@ export default class ReactApp extends React.Component
 
     render()
     {
-        return <div style={this.gridContainter}>
-          <AppBar color='default'>
-            <Toolbar>
-              <Button onClick={this.handleButtonClicked.bind(this, 'Navigation')}>Navigation</Button>
-              <Button onClick={this.handleButtonClicked.bind(this, 'WindowLevel')}>WindowLevel</Button>
-              <Button onClick={this.handleButtonClicked.bind(this, 'TrackballCamera')}>TrackballCamera</Button>
-            </Toolbar>
-          </AppBar>
-          <ReactVtkImageViewer
-            interactorStyle={this.state.styles[0]}
-            input={this.state.imageData}
-            sliceOrientation={SLICE_ORIENTATION.XZ}
-            focalPoints={this.focalPoints}
-          />
-          <ReactVtkImageViewer
-            interactorStyle={this.state.styles[1]}
-            input={this.state.imageData}
-            sliceOrientation={SLICE_ORIENTATION.XY}
-            focalPoints={this.focalPoints}
-          />
-          <ReactVtkVolumeViewer 
-            interactorStyle={this.state.styles[2]}
-            input={this.state.imageData}
-            preset={1}
-            focalPoints={this.focalPoints}
-           />
-          <ReactVtkImageViewer 
-            interactorStyle={this.state.styles[3]}
-            input={this.state.imageData}
-            sliceOrientation={SLICE_ORIENTATION.YZ}
-            focalPoints={this.focalPoints}
-           />
+        return <div>
+          <Toolbar>
+            <Button onClick={this.handleButtonClicked.bind(this, 'Navigation')}>Navigation</Button>
+            <Button onClick={this.handleButtonClicked.bind(this, 'WindowLevel')}>WindowLevel</Button>
+            <Button onClick={this.handleButtonClicked.bind(this, 'TrackballCamera')}>TrackballCamera</Button>
+          </Toolbar>
+          <Grid container>
+            <Grid container item>
+              <Grid item style={{width:window.innerWidth * 0.5 - 100, height:window.innerHeight * 0.5 - 100}}>
+                <ReactVtkImageViewer
+                  interactorStyle={this.state.styles[0]}
+                  input={this.state.imageData}
+                  sliceOrientation={SLICE_ORIENTATION.XZ}
+                  focalPoints={this.focalPoints}
+                ></ReactVtkImageViewer>
+              </Grid>
+              <Grid item style={{width:window.innerWidth * 0.5 - 100, height:window.innerHeight * 0.5 - 100}}>
+                <ReactVtkImageViewer
+                  interactorStyle={this.state.styles[1]}
+                  input={this.state.imageData}
+                  sliceOrientation={SLICE_ORIENTATION.XY}
+                  focalPoints={this.focalPoints}
+                ></ReactVtkImageViewer>
+              </Grid>
+            </Grid>
+            <Grid container item>
+              <Grid item style={{width:window.innerWidth * 0.5 - 100, height:window.innerHeight * 0.5 - 100}}>
+                <ReactVtkVolumeViewer
+                  interactorStyle={this.state.styles[2]}
+                  input={this.state.imageData}
+                  preset={1}
+                  focalPoints={this.focalPoints}
+                ></ReactVtkVolumeViewer>
+              </Grid>
+              <Grid item style={{width:window.innerWidth * 0.5 - 100, height:window.innerHeight * 0.5 - 100}}>
+                <ReactVtkImageViewer
+                  interactorStyle={this.state.styles[3]}
+                  input={this.state.imageData}
+                  sliceOrientation={SLICE_ORIENTATION.YZ}
+                  focalPoints={this.focalPoints}
+                ></ReactVtkImageViewer>
+              </Grid>
+            </Grid>
+          </Grid>
         </div>
     }
 
