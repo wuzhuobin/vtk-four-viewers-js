@@ -129,4 +129,25 @@ export default class ReactVtkImageViewer extends ReactVtkViewer
     }
     super.setInteractorStyle(interactorStyle);
   }
+
+  setCursorPosition(pos)
+  {
+    if(pos == null || this.imageMapper == null)
+    {
+      return;
+    }
+    this.imageMapper.getSlice();
+    for(let i in ReactVtkViewer.allViewers())
+    {
+      const viewer = ReactVtkViewer.allViewers()[i];
+      if(viewer == this || viewer.imageMapper == null)
+      {
+        continue;
+      }
+      // this slice from vtkITKImageReader is in XYZ world coordinate. 
+      // which it do not need to be transformed with origin and spacing. 
+      viewer.imageMapper.setSlice(pos[viewer.imageMapper.getSlicingMode() - 3]);
+    }
+    super.setCursorPosition(pos);
+  }
 }

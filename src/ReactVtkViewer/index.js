@@ -104,8 +104,9 @@ export default class ReactVtkViewer extends React.Component
   setInteractorStyle(interactorStyle)
   {
     this.interactor.setInteractorStyle(interactorStyle);
+    // first render could force reset camera and camera clipping range
+    // Without it the viewer will go dark.
     this.firstRender = true;
-    this.render();
  }
 
   setCursorPosition(pos)

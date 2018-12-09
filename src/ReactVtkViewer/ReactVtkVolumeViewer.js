@@ -27,7 +27,6 @@ export default class ReactVtkVolumeViewer extends ReactVtkViewer
       return;
     }
     this.volumeMapper.setInputData(input);
-    this.renderWindow.render();
   }
 
   setPreset(preset) {

@@ -25,9 +25,10 @@ function vtkCursor3D(publicAPI, model) {
       return;
     }
     publicAPI.modified();
-    for (let i = 0; i < bounds.length && i < model.modelBounds.length; ++i) {
-      model.modelBounds[i] = bounds[i];
-    }
+    // Doing type convert, make sure it is a number array.
+    // Without correct coversion, the array may contains string which cause
+    // the wrapping and clampping works incorrectly.
+    model.modelBounds = bounds.map((v) => Number(v));
     for (let i = 0; i < 3; ++i) {
       model.modelBounds[2 * i] = Math.min(
         model.modelBounds[2 * i],
@@ -51,7 +52,7 @@ function vtkCursor3D(publicAPI, model) {
     const v = [];
     for (let i = 0; i < 3; i++) {
       v[i] = points[i] - model.focalPoint[i];
-      model.focalPoint[i] = points[i];
+      model.focalPoint[i] = Number(points[i]);
 
       if (model.translationMode) {
         model.modelBounds[2 * i] += v[i];
@@ -104,7 +105,7 @@ function vtkCursor3D(publicAPI, model) {
         model.focalPoint[i] =
           model.modelBounds[2 * i] +
           (((model.focalPoint[i] - model.modelBounds[2 * i]) * 1.0) %
-            (model.focalPoint[2 * i + 1] - model.modelBounds[2 * i]));
+            (model.modelBounds[2 * i + 1] - model.modelBounds[2 * i]));
       }
     } else {
       for (let i = 0; i < model.focalPoint.length; ++i) {
@@ -262,19 +263,6 @@ function vtkCursor3D(publicAPI, model) {
       cid += 3;
       // Fill in remaining lines
       // vtk.js do not support checking repeating insertion
-      // newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-      // newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
-      // newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-      // cross_ = pid;
-      // ++pid;
-      // newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-      // newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-      // newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-      // ++pid;
-      // newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-      // newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
-      // newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-      // ++pid;
       newLines.getData()[(cid + 0) * 3 + 0] = 2;
       newLines.getData()[(cid + 0) * 3 + 1] = corner124;
       newLines.getData()[(cid + 0) * 3 + 2] = corner134;
@@ -282,19 +270,6 @@ function vtkCursor3D(publicAPI, model) {
       newLines.getData()[(cid + 1) * 3 + 1] = corner124;
       newLines.getData()[(cid + 1) * 3 + 2] = corner125;
       cid += 2;
-      // newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
-      // newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-      // newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-      // cross_ = pid;
-      // ++pid;
-      // newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-      // newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-      // newPts.getData()[pid * 3 + 2] = model.modelBounds[4];
-      // ++pid;
-      // newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
-      // newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-      // newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-      // ++pid;
       newLines.getData()[(cid + 0) * 3 + 0] = 2;
       newLines.getData()[(cid + 0) * 3 + 1] = corner034;
       newLines.getData()[(cid + 0) * 3 + 2] = corner134;
@@ -302,19 +277,6 @@ function vtkCursor3D(publicAPI, model) {
       newLines.getData()[(cid + 1) * 3 + 1] = corner034;
       newLines.getData()[(cid + 1) * 3 + 2] = corner035;
       cid += 2;
-      // newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
-      // newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
-      // newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-      // cross_ = pid;
-      // ++pid;
-      // newPts.getData()[pid * 3 + 0] = model.modelBounds[1];
-      // newPts.getData()[pid * 3 + 1] = model.modelBounds[2];
-      // newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-      // ++pid;
-      // newPts.getData()[pid * 3 + 0] = model.modelBounds[0];
-      // newPts.getData()[pid * 3 + 1] = model.modelBounds[3];
-      // newPts.getData()[pid * 3 + 2] = model.modelBounds[5];
-      // ++pid;
       newLines.getData()[(cid + 0) * 3 + 0] = 2;
       newLines.getData()[(cid + 0) * 3 + 1] = corner025;
       newLines.getData()[(cid + 0) * 3 + 2] = corner125;
@@ -412,10 +374,14 @@ function vtkCursor3D(publicAPI, model) {
         ++cid;
       }
     }
-    // update ourseleves and release memory
-    model.focus.getPoints().getData()[0] = model.focalPoint[0];
-    model.focus.getPoints().getData()[1] = model.focalPoint[1];
-    model.focus.getPoints().getData()[2] = model.focalPoint[2];
+    const pts = vtkPoints.newInstance({ size: 3 });
+    pts.getData()[0] = model.focalPoint[0];
+    pts.getData()[1] = model.focalPoint[1];
+    pts.getData()[2] = model.focalPoint[2];
+    // update ourseleves
+    model.focus = vtkPolyData.newInstance();
+    model.focus.setPoints(pts);
+
     polyData.setPoints(newPts);
     polyData.setLines(newLines);
     outData[0] = polyData;
@@ -427,7 +393,7 @@ function vtkCursor3D(publicAPI, model) {
 // ----------------------------------------------------------------------------
 
 const DEFAULT_VALUES = {
-  focus: vtkPolyData.newInstance(),
+  focus: null,
   modelBounds: [-1.0, 1.0, -1.0, 1.0, -1.0, 1.0],
   focalPoint: [0.0, 0.0, 0.0],
   outline: true,
@@ -444,11 +410,6 @@ const DEFAULT_VALUES = {
 export function extend(publicAPI, model, initialValues = {}) {
   Object.assign(model, DEFAULT_VALUES, initialValues);
 
-  const pts = vtkPoints.newInstance({ size: 3 });
-  pts.getData()[0] = 0;
-  pts.getData()[1] = 0;
-  pts.getData()[2] = 0;
-  model.focus.setPoints(pts);
   // Build VTK API
   // Cursor3D
   macro.obj(publicAPI, model);
@@ -461,7 +422,7 @@ export function extend(publicAPI, model, initialValues = {}) {
   macro.setGet(publicAPI, model, ['yShadows']);
   macro.setGet(publicAPI, model, ['zShadows']);
   macro.setGet(publicAPI, model, ['wrap']);
-  macro.setGet(publicAPI, model, ['translationModel']);
+  macro.setGet(publicAPI, model, ['translationMode']);
   macro.algo(publicAPI, model, 0, 1);
   vtkCursor3D(publicAPI, model);
 }
