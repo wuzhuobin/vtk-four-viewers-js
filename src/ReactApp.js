@@ -63,7 +63,7 @@ export default class ReactApp extends React.Component
           </Toolbar>
           <Grid container>
             <Grid container item>
-              <Grid item style={{width:window.innerWidth * 0.5 - 100, height:window.innerHeight * 0.5 - 100}}>
+              <Grid item style={{width: "40%", height: "40%"}}>
                 <ReactVtkImageViewer
                   interactorStyle={this.state.styles[0]}
                   input={this.state.imageData}
@@ -71,7 +71,7 @@ export default class ReactApp extends React.Component
                   focalPoints={this.focalPoints}
                 ></ReactVtkImageViewer>
               </Grid>
-              <Grid item style={{width:window.innerWidth * 0.5 - 100, height:window.innerHeight * 0.5 - 100}}>
+              <Grid item style={{width: "40%", height: "40%"}}>
                 <ReactVtkImageViewer
                   interactorStyle={this.state.styles[1]}
                   input={this.state.imageData}
@@ -81,7 +81,7 @@ export default class ReactApp extends React.Component
               </Grid>
             </Grid>
             <Grid container item>
-              <Grid item style={{width:window.innerWidth * 0.5 - 100, height:window.innerHeight * 0.5 - 100}}>
+              <Grid item style={{width: "40%", height: "40%"}}>
                 <ReactVtkVolumeViewer
                   interactorStyle={this.state.styles[2]}
                   input={this.state.imageData}
@@ -89,7 +89,7 @@ export default class ReactApp extends React.Component
                   focalPoints={this.focalPoints}
                 ></ReactVtkVolumeViewer>
               </Grid>
-              <Grid item style={{width:window.innerWidth * 0.5 - 100, height:window.innerHeight * 0.5 - 100}}>
+              <Grid item style={{width: "40%", height: "40%"}}>
                 <ReactVtkImageViewer
                   interactorStyle={this.state.styles[3]}
                   input={this.state.imageData}

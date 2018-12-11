@@ -1,5 +1,5 @@
 // me 
-import vtkCursor3D from '../vtkCursor3D';
+import vtkCursor3D from 'vtk.js/Sources/Filters/Sources/Cursor3D';
 // react 
 import React from 'react'
 // vtk
