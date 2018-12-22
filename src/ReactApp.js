@@ -5,6 +5,8 @@ import ReactVtkImageViewer from './ReactVtkViewer/ReactVtkImageViewer';
 import {SLICE_ORIENTATION} from './ReactVtkViewer/ReactVtkImageViewer';
 import ReactVtkVolumeViewer from './ReactVtkViewer/ReactVtkVolumeViewer';
 import vtkInteractorStyleImage2 from './vtkInteractorStyleImage2';
+import ImageViewer from './ReactViewer/ImageViewer';
+import {SliceOrientation} from './vtkImageViewer/Constants'
 // vtk 
 import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/InteractorStyleTrackballCamera';
 import vtkInteractorStyleImage from 'vtk.js/Sources/Interaction/Style/InteractorStyleImage'
@@ -63,39 +65,27 @@ export default class ReactApp extends React.Component
           </Toolbar>
           <Grid container>
             <Grid container item>
-              <Grid item style={{width: "40%", height: "40%"}}>
-                <ReactVtkImageViewer
-                  interactorStyle={this.state.styles[0]}
-                  input={this.state.imageData}
-                  sliceOrientation={SLICE_ORIENTATION.XZ}
-                  focalPoints={this.focalPoints}
-                ></ReactVtkImageViewer>
+              <Grid item style={{width: "40", height: "40"}}>
+                <ImageViewer
+                  inputData={this.state.imageData}
+                  sliceOrientation={SliceOrientation.SLICE_ORIENTATION_YZ}
+                ></ImageViewer>
               </Grid>
-              <Grid item style={{width: "40%", height: "40%"}}>
-                <ReactVtkImageViewer
-                  interactorStyle={this.state.styles[1]}
-                  input={this.state.imageData}
-                  sliceOrientation={SLICE_ORIENTATION.XY}
-                  focalPoints={this.focalPoints}
-                ></ReactVtkImageViewer>
+              <Grid item style={{width: "40", height: "40"}}>
+                <ImageViewer
+                  inputData={this.state.imageData}
+                  sliceOrientation={SliceOrientation.SLICE_ORIENTATION_XY}
+                ></ImageViewer>
               </Grid>
             </Grid>
             <Grid container item>
-              <Grid item style={{width: "40%", height: "40%"}}>
-                <ReactVtkVolumeViewer
-                  interactorStyle={this.state.styles[2]}
-                  input={this.state.imageData}
-                  preset={1}
-                  focalPoints={this.focalPoints}
-                ></ReactVtkVolumeViewer>
+              <Grid item style={{width: "40", height: "40"}}>
               </Grid>
-              <Grid item style={{width: "40%", height: "40%"}}>
-                <ReactVtkImageViewer
-                  interactorStyle={this.state.styles[3]}
-                  input={this.state.imageData}
-                  sliceOrientation={SLICE_ORIENTATION.YZ}
-                  focalPoints={this.focalPoints}
-                ></ReactVtkImageViewer>
+              <Grid item style={{width: "40", height: "40"}}>
+                <ImageViewer
+                  inputData={this.state.imageData}
+                  sliceOrientation={SliceOrientation.SLICE_ORIENTATION_XZ}
+                ></ImageViewer>
               </Grid>
             </Grid>
           </Grid>
