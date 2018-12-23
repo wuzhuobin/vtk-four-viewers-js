@@ -19,17 +19,15 @@ function vtkInteractorStyleTrackballCamera2(publicAPI, model){
     switch (callData.key){
       case 'r':
       case 'R':
-        if (model.viewer === null) {
-          superClass.handleKeyPress(callData);
-        }
-        else if (model.viewer.isA('vtkImageViewer')) {
+        if (model.viewer !== null && 
+          model.viewer.isA('vtkImageViewer')) {
           model.viewer.updateDisplayExtent();
           model.viewer.updateOrientation();
           model.viewer.getRenderer().resetCamera();
           model.viewer.getRenderer().resetCameraClippingRange();
           model.viewer.getRenderWindow().render();
+          break;
         }
-        break;
       default:
         superClass.handleKeyPress(callData);
         break;
@@ -38,11 +36,12 @@ function vtkInteractorStyleTrackballCamera2(publicAPI, model){
 
   //--------------------------------------------------------------------------
   publicAPI.handleStartMouseWheel = (callData) => {
-    if(model.viewer === null ) {
-      superClass.handleStartMouseWheel();
-    }
-    else if (model.viewer.isA('vtkImageViewer')){
+    if(model.viewer !== null && 
+      model.viewer.isA('vtkImageViewer')) {
       publicAPI.startSlice();
+    }
+    else {
+      superClass.handleStartMouseWheel(callData);
     }
   };
 
@@ -65,7 +64,8 @@ function vtkInteractorStyleTrackballCamera2(publicAPI, model){
         publicAPI.slice(callData.spinY);
         break;
       default:
-        publicAPI.superHandleMouseWheel(callData);
+        superClass.handleMouseWheel(callData);
+        break;
     }
   };
 

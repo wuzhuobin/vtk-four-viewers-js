@@ -57,11 +57,12 @@ function vtkInteractorStyleNavigation(publicAPI, model) {
     }
   };
   publicAPI.handleLeftButtonPress = (callData) => {
-    if(model.viewer === null) {
-      superClass.handleLeftButtonPress(callData);
-    }
-    else if(model.viewer.isA('vtkImageViewer')) {
+    if(model.viewer !== null &&
+       model.viewer.isA('vtkImageViewer')) {
       publicAPI.startNavigation();
+    }
+    else {
+      superClass.handleLeftButtonPress(callData);
     }
   };
   publicAPI.handleLeftButtonRelease = () => {

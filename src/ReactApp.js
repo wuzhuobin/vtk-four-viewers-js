@@ -4,6 +4,8 @@ import React from 'react'
 import vtkInteractorStyleNavigation from './InteractorStyle/vtkInteractorStyleNavigation';
 import vtkInteractorStyleTrackballCamera2 from './InteractorStyle/vtkInteractorStyleTrackballCamera2';
 import ImageViewer from './ReactViewer/ImageViewer';
+import VolumeViewer from './ReactViewer/VolumeViewer';
+// import VolumeViewer from '.'
 import {SliceOrientation} from './vtkImageViewer/Constants'
 // vtk 
 import vtkInteractorStyleImage from 'vtk.js/Sources/Interaction/Style/InteractorStyleImage'
@@ -82,6 +84,11 @@ export default class ReactApp extends React.Component
             </Grid>
             <Grid container item>
               <Grid item style={{width: "50", height: "50"}}>
+                <VolumeViewer
+                  inputData={this.state.imageData}
+                  style={this.state.styles[2]}
+                  preset={1}
+                ></VolumeViewer>
               </Grid>
               <Grid item style={{width: "50", height: "50"}}>
                 <ImageViewer
