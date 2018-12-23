@@ -12,7 +12,8 @@ export default class ImageViewer extends React.Component
     this.imageViewer = vtkImageViewer.newInstance();
     this.imageViewer.setInputData(this.props.inputData);
     this.imageViewer.setSliceOrientation(this.props.sliceOrientation);
-    // this.imageViewer.getInteractor().setInteractorStyle(this.props.style);
+    this.imageViewer.getInteractor().setInteractorStyle(this.props.style);
+    this.props.style.setViewer(this.imageViewer);
   }
 
   shouldComponentUpdate(nextProps, nextState)
@@ -23,6 +24,8 @@ export default class ImageViewer extends React.Component
     }
     this.imageViewer.setInputData(nextProps.inputData);
     this.imageViewer.setSliceOrientation(nextProps.sliceOrientation);
+    this.imageViewer.getInteractor().setInteractorStyle(nextProps.style);
+    nextProps.style.setViewer(this.imageViewer);
     return true;
   }
 

@@ -1,22 +1,17 @@
 // react 
 import React from 'react'
 // me 
-import ReactVtkImageViewer from './ReactVtkViewer/ReactVtkImageViewer';
-import {SLICE_ORIENTATION} from './ReactVtkViewer/ReactVtkImageViewer';
-import ReactVtkVolumeViewer from './ReactVtkViewer/ReactVtkVolumeViewer';
-import vtkInteractorStyleImage2 from './vtkInteractorStyleImage2';
+import vtkInteractorStyleNavigation from './InteractorStyle/vtkInteractorStyleNavigation';
+import vtkInteractorStyleTrackballCamera2 from './InteractorStyle/vtkInteractorStyleTrackballCamera2';
 import ImageViewer from './ReactViewer/ImageViewer';
 import {SliceOrientation} from './vtkImageViewer/Constants'
 // vtk 
-import vtkInteractorStyleTrackballCamera from 'vtk.js/Sources/Interaction/Style/InteractorStyleTrackballCamera';
 import vtkInteractorStyleImage from 'vtk.js/Sources/Interaction/Style/InteractorStyleImage'
 import vtkHttpDataAccessHelper from 'vtk.js/Sources/IO/Core/DataAccessHelper/HttpDataAccessHelper';
 import vtkITKImageReader from 'vtk.js/Sources/IO/Misc/ITKImageReader';
-import vtkImageMapperSlicingMode from 'vtk.js/Sources/Rendering/Core/ImageMapper/Constants';
 // itk 
 import itkReadImageArrayBuffer from 'itk/readImageArrayBuffer';
 // material-ui
-import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import Button from '@material-ui/core/Button'
 import Grid from '@material-ui/core/Grid';
@@ -37,7 +32,12 @@ export default class ReactApp extends React.Component
         this.state = 
         {
           imageData: null,
-          styles: [null, null, null, null]
+          styles: [
+            vtkInteractorStyleTrackballCamera2.newInstance(),
+            vtkInteractorStyleTrackballCamera2.newInstance(),
+            vtkInteractorStyleTrackballCamera2.newInstance(),
+            vtkInteractorStyleTrackballCamera2.newInstance(),
+          ]
         };
         // this.handleButtonClicked = this.handleButtonClicked.bind(this);
         const fileName = 'T2.nii';
@@ -59,32 +59,35 @@ export default class ReactApp extends React.Component
     {
         return <div>
           <Toolbar>
+            <Button onClick={this.handleButtonClicked.bind(this, 'TrackballCamera')}>TrackballCamera</Button>
             <Button onClick={this.handleButtonClicked.bind(this, 'Navigation')}>Navigation</Button>
             <Button onClick={this.handleButtonClicked.bind(this, 'WindowLevel')}>WindowLevel</Button>
-            <Button onClick={this.handleButtonClicked.bind(this, 'TrackballCamera')}>TrackballCamera</Button>
           </Toolbar>
           <Grid container>
             <Grid container item>
-              <Grid item style={{width: "40", height: "40"}}>
+              <Grid item style={{width: "50", height: "50"}}>
                 <ImageViewer
                   inputData={this.state.imageData}
                   sliceOrientation={SliceOrientation.SLICE_ORIENTATION_YZ}
+                  style={this.state.styles[0]}
                 ></ImageViewer>
               </Grid>
-              <Grid item style={{width: "40", height: "40"}}>
+              <Grid item style={{width: "50", height: "50"}}>
                 <ImageViewer
                   inputData={this.state.imageData}
                   sliceOrientation={SliceOrientation.SLICE_ORIENTATION_XY}
+                  style={this.state.styles[1]}
                 ></ImageViewer>
               </Grid>
             </Grid>
             <Grid container item>
-              <Grid item style={{width: "40", height: "40"}}>
+              <Grid item style={{width: "50", height: "50"}}>
               </Grid>
-              <Grid item style={{width: "40", height: "40"}}>
+              <Grid item style={{width: "50", height: "50"}}>
                 <ImageViewer
                   inputData={this.state.imageData}
                   sliceOrientation={SliceOrientation.SLICE_ORIENTATION_XZ}
+                  style={this.state.styles[3]}
                 ></ImageViewer>
               </Grid>
             </Grid>
@@ -99,7 +102,7 @@ export default class ReactApp extends React.Component
       {
         for(let i = 0; i < styles.length; ++i)
         {
-          styles[i] = vtkInteractorStyleImage2.newInstance();
+          styles[i] = vtkInteractorStyleNavigation.newInstance();
         }
       }
       else if(event == 'WindowLevel')
@@ -113,7 +116,7 @@ export default class ReactApp extends React.Component
       {
         for(let i = 0; i < styles.length; ++i)
         {
-          styles[i] = vtkInteractorStyleTrackballCamera.newInstance();
+          styles[i] = vtkInteractorStyleTrackballCamera2.newInstance();
         }
       }
       this.setState({ styles: styles });

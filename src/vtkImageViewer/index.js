@@ -52,12 +52,14 @@ function vtkImageViewer(publicAPI, model) {
       const [low, high] = model.inputData.getPointData().getScalars().getRange();
       model.imageSlice.getProperty().setColorWindow(high - low);
       model.imageSlice.getProperty().setColorLevel((high + low) * 0.5);
-      publicAPI.updateDisplayExetent();
+      publicAPI.updateDisplayExtent();
     }
   };
   publicAPI.setCursorPosition = (position) => {
     superClass.setCursorPosition(position);
-    publicAPI.setSlice(position[model.sliceOrientation]);
+    // if (model.slice !== position[model.sliceOrientation]) {
+    //   publicAPI.setSlice(position[model.sliceOrientation]);
+    // }
   };
   publicAPI.setSliceOrientation = (orientation) => {
     if(model.sliceOrientation === orientation) {
@@ -69,7 +71,7 @@ function vtkImageViewer(publicAPI, model) {
     }
     model.sliceOrientation = orientation;
     publicAPI.updateOrientation();
-    publicAPI.updateDisplayExetent();
+    publicAPI.updateDisplayExtent();
     if (model.inputData) {
       const scale = model.renderer.getActiveCamera().getParallelScale();
       model.renderer.resetCamera();
@@ -86,10 +88,13 @@ function vtkImageViewer(publicAPI, model) {
       return;
     }
     model.slice = slice;
-    publicAPI.updateDisplayExetent();
+    // const pos = publicAPI.getCursorPosition();
+    // pos[model.sliceOrientation] = model.slice;
+    // publicAPI.setCursorPosition(pos);
+    publicAPI.updateDisplayExtent();
     publicAPI.render();
   };
-  publicAPI.updateDisplayExetent = () => {
+  publicAPI.updateDisplayExtent = () => {
     if(model.inputData === null) {
       return;
     }
