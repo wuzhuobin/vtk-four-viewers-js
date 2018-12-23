@@ -14,6 +14,8 @@ const stateNames =
 // ----------------------------------------------------------------------------
 
 function vtkInteractorStyleNavigation(publicAPI, model) {
+
+  // Set our className
   model.classHierarchy.push('vtkInteractorStyleNavigation');
   
   // Capture "parentClass" api for internal use
